@@ -167,16 +167,22 @@ public class Maze extends Applet {
 		}
 	}
 
+	/**
+	 * Called whenever the client moves to a new position
+	 * @param g graphics object
+	 */
 	@Override
 	public void update(Graphics g) {
 
 			clientPositions.forEach((key, value) -> {
 				PositionInMaze pos = (PositionInMaze) value;
-				System.out.println("Painting   x: " + pos.getXpos() + "   y: " + pos.getYpos());
 				g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
 			});
+
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }
-
-//}
-
