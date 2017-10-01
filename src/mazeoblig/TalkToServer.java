@@ -10,6 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class TalkToServer extends UnicastRemoteObject implements TalkToServerInterface {
 
+    private int clientId = 0;
 
     protected TalkToServer() throws RemoteException {
     }
@@ -17,5 +18,10 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
     @Override
     public void sendPosition(PositionInMaze pos) throws RemoteException {
         System.out.println(pos);
+    }
+
+    @Override
+    public int getClientId() throws RemoteException {
+        return clientId++;
     }
 }

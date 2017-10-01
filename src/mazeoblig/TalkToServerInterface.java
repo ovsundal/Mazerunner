@@ -7,4 +7,5 @@ import java.rmi.RemoteException;
 
 public interface TalkToServerInterface extends Remote{
     void sendPosition(PositionInMaze pos) throws RemoteException;
+    int getClientId() throws RemoteException;
 }

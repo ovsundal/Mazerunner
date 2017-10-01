@@ -43,6 +43,7 @@ public class Maze extends Applet {
 	private int server_portnumber;
 
 	private TalkToServerInterface talkToServerInterface;
+	private int clientId;
 
 	/**
 	 * Henter labyrinten fra RMIServer
@@ -71,6 +72,9 @@ public class Maze extends Applet {
 
 			//Henter referansen til TalkToServerInterface metoder
             talkToServerInterface = (TalkToServerInterface) r.lookup(RMIServer.talkToServerIdString);
+
+            //Get unique id for this particular client
+            clientId = talkToServerInterface.getClientId();
 /*
 ** Finner l�sningene ut av maze - se for�vrig kildekode for VirtualMaze for ytterligere
 ** kommentarer. L�sningen er implementert med backtracking-algoritme
