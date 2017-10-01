@@ -31,14 +31,13 @@ public class RMIServer
   private static String HOST_NAME;
   private static InetAddress myAdress = null;
   private static RMIServer rmi;
-
   private static BoxMaze maze;
   public static String MazeName = "Maze";
   /**
    * @todo: Her legger man til andre objekter som skal v�re p� server
   */
-    private static InfoToServer infoToServer;
-    public static String InfoToServerName = "InfoToServer";
+    private static TalkToServer talkToServer;
+    public static String talkToServerIdString = "TalkToServer";
 
   public RMIServer() throws RemoteException, MalformedURLException,
                              NotBoundException, AlreadyBoundException {
@@ -59,13 +58,13 @@ public class RMIServer
     /**
     * @todo: Og her legges andre objekter som ogs� skal v�re p� server inn ....
     */
-      infoToServer = new InfoToServer();
-      System.out.println( "Remote infoToServer object created" );
+      talkToServer = new TalkToServer();
+      System.out.println( "Remote talkToServer object created" );
 
       String infoToServerString = "//" + HOST_NAME + ":" + PORT + "/" +
-              InfoToServerName;
+              talkToServerIdString;
 
-      Naming.rebind( infoToServerString, infoToServer );
+      Naming.rebind( infoToServerString, talkToServer);
 
     System.out.println( "Bindings Finished, waiting for client requests." );
   }

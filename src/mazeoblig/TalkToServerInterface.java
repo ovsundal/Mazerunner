@@ -2,6 +2,9 @@ package mazeoblig;
 
 import simulator.PositionInMaze;
 
-public interface TalkToServerInterface {
-    void sendPosition(PositionInMaze pos);
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface TalkToServerInterface extends Remote{
+    void sendPosition(PositionInMaze pos) throws RemoteException;
 }

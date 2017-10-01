@@ -42,6 +42,7 @@ public class Maze extends Applet {
 	private String server_hostname;
 	private int server_portnumber;
 
+	private TalkToServerInterface talkToServerInterface;
 
 	/**
 	 * Henter labyrinten fra RMIServer
@@ -67,7 +68,9 @@ public class Maze extends Applet {
 			 */
 			bm = (BoxMazeInterface) r.lookup(RMIServer.MazeName);
 			maze = bm.getMaze();
-			
+
+			//Henter referansen til TalkToServerInterface metoder
+            talkToServerInterface = (TalkToServerInterface) r.lookup(RMIServer.talkToServerIdString);
 /*
 ** Finner l�sningene ut av maze - se for�vrig kildekode for VirtualMaze for ytterligere
 ** kommentarer. L�sningen er implementert med backtracking-algoritme
@@ -76,8 +79,12 @@ public class Maze extends Applet {
 			PositionInMaze[] pos;
 			pos = vu.getFirstIterationLoop();
 
-			for (int i = 0; i < pos.length; i++)
-				System.out.println(pos[i]);
+			for (int i = 0; i < pos.length; i++) {
+			    //send posisjon til server
+                talkToServerInterface.sendPosition(pos[i]);
+                System.out.println(pos[i]);
+            }
+
 
 			pos = vu.getIterationLoop();
 			for (int i = 0; i < pos.length; i++)

@@ -5,10 +5,13 @@ import simulator.PositionInMaze;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class InfoToServer extends UnicastRemoteObject implements InfoToServerInterface {
+/**
+ * Class responsible for client-server-client communication
+ */
+public class TalkToServer extends UnicastRemoteObject implements TalkToServerInterface {
 
 
-    protected InfoToServer() throws RemoteException {
+    protected TalkToServer() throws RemoteException {
     }
 
     @Override
