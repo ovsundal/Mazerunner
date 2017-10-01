@@ -1,5 +1,8 @@
 package mazeoblig;
 
+import simulator.PositionInMaze;
+import simulator.VirtualUser;
+
 import java.awt.*;
 import java.applet.*;
 
@@ -19,8 +22,8 @@ import java.applet.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 /**
- * Tegner opp maze i en applet, basert på definisjon som man finner på RMIServer
- * RMIServer på sin side  henter størrelsen fra definisjonen i Maze
+ * Tegner opp maze i en applet, basert pï¿½ definisjon som man finner pï¿½ RMIServer
+ * RMIServer pï¿½ sin side  henter stï¿½rrelsen fra definisjonen i Maze
  * @author asd
  *
  */
@@ -47,7 +50,7 @@ public class Maze extends Applet {
 		int size = dim;
 		/*
 		 ** Kobler opp mot RMIServer, under forutsetning av at disse
-		 ** kjører på samme maskin. Hvis ikke må oppkoblingen
+		 ** kjï¿½rer pï¿½ samme maskin. Hvis ikke mï¿½ oppkoblingen
 		 ** skrives om slik at dette passer med virkeligheten.
 		 */
 		if (server_hostname == null)
@@ -66,20 +69,20 @@ public class Maze extends Applet {
 			maze = bm.getMaze();
 			
 /*
-** Finner løsningene ut av maze - se forøvrig kildekode for VirtualMaze for ytterligere
-** kommentarer. Løsningen er implementert med backtracking-algoritme
-*
+** Finner lï¿½sningene ut av maze - se forï¿½vrig kildekode for VirtualMaze for ytterligere
+** kommentarer. Lï¿½sningen er implementert med backtracking-algoritme
+*/
 			VirtualUser vu = new VirtualUser(maze);
-			PositionInMaze [] pos;
-/*			pos = vu.getFirstIterationLoop();
+			PositionInMaze[] pos;
+			pos = vu.getFirstIterationLoop();
 
 			for (int i = 0; i < pos.length; i++)
 				System.out.println(pos[i]);
-*
+
 			pos = vu.getIterationLoop();
 			for (int i = 0; i < pos.length; i++)
 				System.out.println(pos[i]);
-/**/			
+
 		}
 		catch (RemoteException e) {
 			System.err.println("Remote Exception: " + e.getMessage());
@@ -87,11 +90,11 @@ public class Maze extends Applet {
 		}
 		catch (NotBoundException f) {
 			/*
-			 ** En exception her er en indikasjon på at man ved oppslag (lookup())
-			 ** ikke finner det objektet som man søker.
-			 ** Årsaken til at dette skjer kan være mange, men vær oppmerksom på
+			 ** En exception her er en indikasjon pï¿½ at man ved oppslag (lookup())
+			 ** ikke finner det objektet som man sï¿½ker.
+			 ** ï¿½rsaken til at dette skjer kan vï¿½re mange, men vï¿½r oppmerksom pï¿½
 			 ** at hvis hostname ikke er OK (RMIServer gir da feilmelding under
-			 ** oppstart) kan være en årsak.
+			 ** oppstart) kan vï¿½re en ï¿½rsak.
 			 */
 			System.err.println("Not Bound Exception: " + f.getMessage());
 			System.exit(0);
@@ -121,7 +124,7 @@ public class Maze extends Applet {
 	public void paint (Graphics g) {
 		int x, y;
 
-		// Tegner baser på box-definisjonene ....
+		// Tegner baser pï¿½ box-definisjonene ....
 
 		for (x = 1; x < (dim - 1); ++x)
 			for (y = 1; y < (dim - 1); ++y) {
