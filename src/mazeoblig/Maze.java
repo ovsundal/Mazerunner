@@ -21,6 +21,8 @@ import java.applet.*;
  */
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
+import java.util.HashMap;
+
 /**
  * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
  * RMIServer p� sin side  henter st�rrelsen fra definisjonen i Maze
@@ -44,6 +46,8 @@ public class Maze extends Applet {
 
 	private TalkToServerInterface talkToServerInterface;
 	private int clientId;
+	private HashMap clientPositions = null;
+
 
 	/**
 	 * Henter labyrinten fra RMIServer
@@ -75,25 +79,6 @@ public class Maze extends Applet {
 
             //Get unique id for this particular client
             clientId = talkToServerInterface.getClientId();
-/*
-** Finner l�sningene ut av maze - se for�vrig kildekode for VirtualMaze for ytterligere
-** kommentarer. L�sningen er implementert med backtracking-algoritme
-*/
-			VirtualUser vu = new VirtualUser(maze);
-			PositionInMaze[] pos;
-			pos = vu.getFirstIterationLoop();
-
-			for (int i = 0; i < pos.length; i++) {
-			    //send posisjon til server
-                talkToServerInterface.sendPosition(pos[i]);
-                System.out.println(pos[i]);
-            }
-
-
-			pos = vu.getIterationLoop();
-			for (int i = 0; i < pos.length; i++)
-				System.out.println(pos[i]);
-
 		}
 		catch (RemoteException e) {
 			System.err.println("Remote Exception: " + e.getMessage());
@@ -137,17 +122,61 @@ public class Maze extends Applet {
 
 		// Tegner baser p� box-definisjonene ....
 
-		for (x = 1; x < (dim - 1); ++x)
-			for (y = 1; y < (dim - 1); ++y) {
-				if (maze[x][y].getUp() == null)
-					g.drawLine(x * 10, y * 10, x * 10 + 10, y * 10);
-				if (maze[x][y].getDown() == null)
-					g.drawLine(x * 10, y * 10 + 10, x * 10 + 10, y * 10 + 10);
-				if (maze[x][y].getLeft() == null)
-					g.drawLine(x * 10, y * 10, x * 10, y * 10 + 10);
-				if (maze[x][y].getRight() == null)
-					g.drawLine(x * 10 + 10, y * 10, x * 10 + 10, y * 10 + 10);
+			for (x = 1; x < (dim - 1); ++x)
+				for (y = 1; y < (dim - 1); ++y) {
+					if (maze[x][y].getUp() == null)
+						g.drawLine(x * 50, y * 50, x * 50 + 50, y * 50);
+					if (maze[x][y].getDown() == null)
+						g.drawLine(x * 50, y * 50 + 50, x * 50 + 50, y * 50 + 50);
+					if (maze[x][y].getLeft() == null)
+						g.drawLine(x * 50, y * 50, x * 50, y * 50 + 50);
+					if (maze[x][y].getRight() == null)
+						g.drawLine(x * 50 + 50, y * 50, x * 50 + 50, y * 50 + 50);
+				}
+		System.out.println("Paint was called");
+		findMazeExit();
+	}
+
+	/**
+	 * Finds the way out of the maze using a backtracking-algorithm. Each position is sent to server,
+	 * then a list of all client locations are returned. All these positions are
+	 * then painted on the applet
+	 */
+	private void findMazeExit() {
+
+		try {
+			VirtualUser vu = new VirtualUser(maze);
+			PositionInMaze[] pos;
+			pos = vu.getFirstIterationLoop();
+
+			for (PositionInMaze po : pos) {
+				talkToServerInterface.sendPosition(clientId, po);
+				clientPositions = talkToServerInterface.getAllClientPositions();
+				update(getGraphics());
+
+				System.out.println("From server: " + clientPositions.get(clientId));
 			}
+
+			//todo uncomment this
+			pos = vu.getIterationLoop();
+//			for (int i = 0; i < pos.length; i++)
+//				System.out.println(pos[i]);
+
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void update(Graphics g) {
+
+			clientPositions.forEach((key, value) -> {
+				PositionInMaze pos = (PositionInMaze) value;
+				System.out.println("Painting   x: " + pos.getXpos() + "   y: " + pos.getYpos());
+				g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
+			});
 	}
 }
+
+//}
 
