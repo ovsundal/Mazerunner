@@ -21,6 +21,7 @@ import java.applet.*;
  */
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -47,7 +48,7 @@ public class Maze extends Applet {
 	private TalkToServerInterface talkToServerInterface;
 	private int clientId;
 	private HashMap clientPositions = null;
-
+	private ArrayList<Client> clients = new ArrayList<>();
 
 	/**
 	 * Henter labyrinten fra RMIServer
@@ -144,27 +145,36 @@ public class Maze extends Applet {
 	 */
 	private void findMazeExit() {
 
-		try {
-			VirtualUser vu = new VirtualUser(maze);
-			PositionInMaze[] pos;
-			pos = vu.getFirstIterationLoop();
 
-			for (PositionInMaze po : pos) {
-				talkToServerInterface.sendPosition(clientId, po);
-				clientPositions = talkToServerInterface.getAllClientPositions();
-				update(getGraphics());
-
-				System.out.println("From server: " + clientPositions.get(clientId));
-			}
-
-			//todo uncomment this
-			pos = vu.getIterationLoop();
+		Client clients = new Client(maze);
+//		try {
+//			VirtualUser vu = new VirtualUser(maze);
+//			PositionInMaze[] pos;
+//			pos = vu.getFirstIterationLoop();
+//
+//			for (PositionInMaze po : pos) {
+//				talkToServerInterface.sendPosition(clientId, po);
+//				clientPositions = talkToServerInterface.getAllClientPositions();
+//				update(getGraphics());
+//
+//				System.out.println("From server: " + clientPositions.get(clientId));
+//			}
+//
+//			//todo uncomment this
+//			pos = vu.getIterationLoop();
+//			for (PositionInMaze po : pos) {
+//				talkToServerInterface.sendPosition(clientId, po);
+//				clientPositions = talkToServerInterface.getAllClientPositions();
+//				update(getGraphics());
+//
+//				System.out.println("From server: " + clientPositions.get(clientId));
+//			}
 //			for (int i = 0; i < pos.length; i++)
 //				System.out.println(pos[i]);
 
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+//		} catch (RemoteException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/**
@@ -175,8 +185,11 @@ public class Maze extends Applet {
 	public void update(Graphics g) {
 
 			clientPositions.forEach((key, value) -> {
+
 				PositionInMaze pos = (PositionInMaze) value;
+
 				g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
+
 			});
 
 		try {
@@ -185,4 +198,28 @@ public class Maze extends Applet {
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Class used for creating new clients
+	 */
+	class Client {
+
+		private int clientId;
+		private VirtualUser virtualUser;
+		PositionInMaze[] posFirstIteration;
+		PositionInMaze[] posSecondIteration;
+
+		public Client(Box[][] maze) {
+			try {
+				virtualUser = new VirtualUser(maze);
+				clientId = talkToServerInterface.getClientId();
+				posFirstIteration = virtualUser.getFirstIterationLoop();
+				posSecondIteration = virtualUser.getIterationLoop();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
 }
