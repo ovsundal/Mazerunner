@@ -66,8 +66,8 @@ public class Maze extends Applet {
 			server_portnumber = RMIServer.getRMIPort();
 		try {
 			java.rmi.registry.Registry r = java.rmi.registry.LocateRegistry.
-			getRegistry(server_hostname,
-					server_portnumber);
+					getRegistry(server_hostname,
+							server_portnumber);
 
 			/*
 			 ** Henter inn referansen til Labyrinten (ROR)
@@ -76,16 +76,14 @@ public class Maze extends Applet {
 			maze = bm.getMaze();
 
 			//Henter referansen til TalkToServerInterface metoder
-            talkToServerInterface = (TalkToServerInterface) r.lookup(RMIServer.talkToServerIdString);
+			talkToServerInterface = (TalkToServerInterface) r.lookup(RMIServer.talkToServerIdString);
 
-            //Get unique id for this particular client
-            clientId = talkToServerInterface.getClientId();
-		}
-		catch (RemoteException e) {
+			//Get unique id for this particular client
+			clientId = talkToServerInterface.getClientId();
+		} catch (RemoteException e) {
 			System.err.println("Remote Exception: " + e.getMessage());
 			System.exit(0);
-		}
-		catch (NotBoundException f) {
+		} catch (NotBoundException f) {
 			/*
 			 ** En exception her er en indikasjon p� at man ved oppslag (lookup())
 			 ** ikke finner det objektet som man s�ker.
@@ -102,6 +100,7 @@ public class Maze extends Applet {
 	public String getParameter(String key, String def) {
 		return getParameter(key) != null ? getParameter(key) : def;
 	}
+
 	//Get Applet information
 	public String getAppletInfo() {
 		return "Applet Information";
@@ -109,31 +108,32 @@ public class Maze extends Applet {
 
 	//Get parameter info
 	public String[][] getParameterInfo() {
-		java.lang.String[][] pinfo = { {"Size", "int", ""},
+		java.lang.String[][] pinfo = {{"Size", "int", ""},
 		};
 		return pinfo;
 	}
 
 	/**
 	 * Viser labyrinten / tegner den i applet
+	 *
 	 * @param g Graphics
 	 */
-	public void paint (Graphics g) {
+	public void paint(Graphics g) {
 		int x, y;
 
 		// Tegner baser p� box-definisjonene ....
 
-			for (x = 1; x < (dim - 1); ++x)
-				for (y = 1; y < (dim - 1); ++y) {
-					if (maze[x][y].getUp() == null)
-						g.drawLine(x * 50, y * 50, x * 50 + 50, y * 50);
-					if (maze[x][y].getDown() == null)
-						g.drawLine(x * 50, y * 50 + 50, x * 50 + 50, y * 50 + 50);
-					if (maze[x][y].getLeft() == null)
-						g.drawLine(x * 50, y * 50, x * 50, y * 50 + 50);
-					if (maze[x][y].getRight() == null)
-						g.drawLine(x * 50 + 50, y * 50, x * 50 + 50, y * 50 + 50);
-				}
+		for (x = 1; x < (dim - 1); ++x)
+			for (y = 1; y < (dim - 1); ++y) {
+				if (maze[x][y].getUp() == null)
+					g.drawLine(x * 50, y * 50, x * 50 + 50, y * 50);
+				if (maze[x][y].getDown() == null)
+					g.drawLine(x * 50, y * 50 + 50, x * 50 + 50, y * 50 + 50);
+				if (maze[x][y].getLeft() == null)
+					g.drawLine(x * 50, y * 50, x * 50, y * 50 + 50);
+				if (maze[x][y].getRight() == null)
+					g.drawLine(x * 50 + 50, y * 50, x * 50 + 50, y * 50 + 50);
+			}
 		System.out.println("Paint was called");
 		findMazeExit();
 	}
@@ -145,52 +145,26 @@ public class Maze extends Applet {
 	 */
 	private void findMazeExit() {
 
-
-		Client clients = new Client(maze);
-//		try {
-//			VirtualUser vu = new VirtualUser(maze);
-//			PositionInMaze[] pos;
-//			pos = vu.getFirstIterationLoop();
-//
-//			for (PositionInMaze po : pos) {
-//				talkToServerInterface.sendPosition(clientId, po);
-//				clientPositions = talkToServerInterface.getAllClientPositions();
-//				update(getGraphics());
-//
-//				System.out.println("From server: " + clientPositions.get(clientId));
-//			}
-//
-//			//todo uncomment this
-//			pos = vu.getIterationLoop();
-//			for (PositionInMaze po : pos) {
-//				talkToServerInterface.sendPosition(clientId, po);
-//				clientPositions = talkToServerInterface.getAllClientPositions();
-//				update(getGraphics());
-//
-//				System.out.println("From server: " + clientPositions.get(clientId));
-//			}
-//			for (int i = 0; i < pos.length; i++)
-//				System.out.println(pos[i]);
-
-//		} catch (RemoteException e) {
-//			e.printStackTrace();
-//		}
+		Client client = new Client(maze);
+		client.moveOutOfMaze(client.posFirstIteration);
+		client.moveOutOfMaze(client.posSecondIteration);
 	}
 
 	/**
 	 * Called whenever the client moves to a new position
+	 *
 	 * @param g graphics object
 	 */
 	@Override
 	public void update(Graphics g) {
 
-			clientPositions.forEach((key, value) -> {
+		clientPositions.forEach((key, value) -> {
 
-				PositionInMaze pos = (PositionInMaze) value;
+			PositionInMaze pos = (PositionInMaze) value;
 
-				g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
+			g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
 
-			});
+		});
 
 		try {
 			Thread.sleep(500);
@@ -206,10 +180,10 @@ public class Maze extends Applet {
 
 		private int clientId;
 		private VirtualUser virtualUser;
-		PositionInMaze[] posFirstIteration;
-		PositionInMaze[] posSecondIteration;
+		private PositionInMaze[] posFirstIteration;
+		private PositionInMaze[] posSecondIteration;
 
-		public Client(Box[][] maze) {
+		Client(Box[][] maze) {
 			try {
 				virtualUser = new VirtualUser(maze);
 				clientId = talkToServerInterface.getClientId();
@@ -219,7 +193,24 @@ public class Maze extends Applet {
 				e.printStackTrace();
 			}
 		}
+
+		void moveOutOfMaze(PositionInMaze[] pos) {
+
+			for (PositionInMaze po : pos) {
+				try {
+					talkToServerInterface.sendPosition(clientId, po);
+					clientPositions = talkToServerInterface.getAllClientPositions();
+					update(getGraphics());
+					System.out.println("From server: " + clientPositions.get(clientId));
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+
 	}
+
 
 
 }
