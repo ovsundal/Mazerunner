@@ -23,6 +23,8 @@ import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
@@ -46,12 +48,10 @@ public class Maze extends Applet {
 	private int server_portnumber;
 
 	private TalkToServerInterface talkToServerInterface;
-	private int clientId;
 	private HashMap clientPositions = null;
-	private ArrayList<Client> clients = new ArrayList<>();
 
 	/**
-	 * Henter labyrinten fra RMIServer
+	 * Setup server and registry connection and retrieves all remote objects from RMI server
 	 */
 	public void init() {
 		int size = dim;
@@ -78,8 +78,6 @@ public class Maze extends Applet {
 			//Henter referansen til TalkToServerInterface metoder
 			talkToServerInterface = (TalkToServerInterface) r.lookup(RMIServer.talkToServerIdString);
 
-			//Get unique id for this particular client
-			clientId = talkToServerInterface.getClientId();
 		} catch (RemoteException e) {
 			System.err.println("Remote Exception: " + e.getMessage());
 			System.exit(0);
@@ -94,6 +92,14 @@ public class Maze extends Applet {
 			System.err.println("Not Bound Exception: " + f.getMessage());
 			System.exit(0);
 		}
+	}
+
+	/**
+	 * Create clients and populate maze
+	 */
+	public void start() {
+
+//		CreateClients clients = new CreateClients(10);
 	}
 
 	//Get a parameter value
@@ -114,9 +120,8 @@ public class Maze extends Applet {
 	}
 
 	/**
-	 * Viser labyrinten / tegner den i applet
-	 *
-	 * @param g Graphics
+	 * Render the maze
+	 * @param g
 	 */
 	public void paint(Graphics g) {
 		int x, y;
@@ -134,6 +139,7 @@ public class Maze extends Applet {
 				if (maze[x][y].getRight() == null)
 					g.drawLine(x * 50 + 50, y * 50, x * 50 + 50, y * 50 + 50);
 			}
+
 		System.out.println("Paint was called");
 		findMazeExit();
 	}
@@ -174,7 +180,7 @@ public class Maze extends Applet {
 	}
 
 	/**
-	 * Class used for creating new clients
+	 * Class used for creating a new client
 	 */
 	class Client {
 
@@ -207,10 +213,26 @@ public class Maze extends Applet {
 				}
 			}
 		}
-
-
 	}
 
+	/**
+	 * class used for creating n clients using threads
+	 */
+	class CreateClients extends Thread {
 
+		ExecutorService threadPool;
+		int numberOfClients;
+
+		CreateClients(int numberOfClients) {
+			this.numberOfClients = numberOfClients;
+		}
+
+		public void run() {
+
+			threadPool = Executors.newFixedThreadPool(numberOfClients);
+			threadPool.execute(() -> new Client(maze));
+			threadPool.shutdown();
+		}
+	}
 
 }
