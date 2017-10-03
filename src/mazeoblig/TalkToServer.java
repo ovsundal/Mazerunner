@@ -19,11 +19,15 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
 
     @Override
     public void sendPosition(int id, PositionInMaze pos) throws RemoteException {
-        clientPositions.put(id, pos);
+        synchronized (clientPositions) {
+            clientPositions.put(id, pos);
+        }
+
     }
 
     @Override
-    public int getClientId() throws RemoteException {
+    public synchronized int getClientId() throws RemoteException {
+        System.out.println(clientId);
         return clientId++;
     }
 

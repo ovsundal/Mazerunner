@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
@@ -103,7 +104,8 @@ public class Maze extends Applet {
 	 */
 	public void start() {
 
-//		CreateClients clients = new CreateClients(10);
+		CreateClients clients = new CreateClients(1);
+		clients.run();
 	}
 
 	//Get a parameter value
@@ -130,6 +132,8 @@ public class Maze extends Applet {
 	public void paint(Graphics g) {
 		int x, y;
 
+		g.clearRect(0, 0, getWidth(), getHeight() );
+
 		// Tegner baser p� box-definisjonene ....
 
 		for (x = 1; x < (dim - 1); ++x)
@@ -144,43 +148,24 @@ public class Maze extends Applet {
 					g.drawLine(x * 50 + 50, y * 50, x * 50 + 50, y * 50 + 50);
 			}
 
+			if(clientPositions != null) {
+
+				clientPositions.forEach((key, value) -> {
+
+					PositionInMaze pos = (PositionInMaze) value;
+
+					g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
+
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+				});
+			}
+
 		System.out.println("Paint was called");
-		findMazeExit();
-	}
-
-	/**
-	 * Finds the way out of the maze using a backtracking-algorithm. Each position is sent to server,
-	 * then a list of all client locations are returned. All these positions are
-	 * then painted on the applet
-	 */
-	private void findMazeExit() {
-
-		Client client = new Client(maze);
-		client.joinMaze();
-//		client.joinMaze(client.posSecondIteration);
-	}
-
-	/**
-	 * Called whenever the client moves to a new position
-	 *
-	 * @param g graphics object
-	 */
-	@Override
-	public void update(Graphics g) {
-
-		clientPositions.forEach((key, value) -> {
-
-			PositionInMaze pos = (PositionInMaze) value;
-
-			g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
-
-		});
-
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -211,21 +196,17 @@ public class Maze extends Applet {
 		}
 
 		void joinMaze() {
-
+			System.out.println("a client joined the maze");
 			for (PositionInMaze po : positionInMaze) {
 				try {
 					talkToServerInterface.sendPosition(clientId, po);
 					clientPositions = talkToServerInterface.getAllClientPositions();
-					update(getGraphics());
+					paint(getGraphics());
 					System.out.println("From server: " + clientPositions.get(clientId));
 				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
 			}
-
-
-
-
 		}
 	}
 
@@ -244,9 +225,7 @@ public class Maze extends Applet {
 		public void run() {
 
 			threadPool = Executors.newFixedThreadPool(numberOfClients);
-			threadPool.execute(() -> new Client(maze));
-			threadPool.shutdown();
+			threadPool.execute(() -> new Client(maze).joinMaze());
 		}
 	}
-
 }
