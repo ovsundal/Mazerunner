@@ -1,10 +1,12 @@
 package mazeoblig;
 
+import javafx.geometry.Pos;
 import simulator.PositionInMaze;
 import simulator.VirtualUser;
 
 import java.awt.*;
 import java.applet.*;
+
 
 /**
  *
@@ -22,6 +24,8 @@ import java.applet.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -152,8 +156,8 @@ public class Maze extends Applet {
 	private void findMazeExit() {
 
 		Client client = new Client(maze);
-		client.moveOutOfMaze(client.posFirstIteration);
-		client.moveOutOfMaze(client.posSecondIteration);
+		client.joinMaze();
+//		client.joinMaze(client.posSecondIteration);
 	}
 
 	/**
@@ -186,23 +190,29 @@ public class Maze extends Applet {
 
 		private int clientId;
 		private VirtualUser virtualUser;
-		private PositionInMaze[] posFirstIteration;
-		private PositionInMaze[] posSecondIteration;
+		private PositionInMaze[] positionInMaze;
 
 		Client(Box[][] maze) {
 			try {
 				virtualUser = new VirtualUser(maze);
 				clientId = talkToServerInterface.getClientId();
-				posFirstIteration = virtualUser.getFirstIterationLoop();
-				posSecondIteration = virtualUser.getIterationLoop();
+				PositionInMaze[] posFirstIteration = virtualUser.getFirstIterationLoop();
+				PositionInMaze[] posSecondIteration = virtualUser.getIterationLoop();
+
+				//merge arrays
+				Collection<PositionInMaze> placeholder = new ArrayList<>();
+				placeholder.addAll(Arrays.asList(posFirstIteration));
+				placeholder.addAll(Arrays.asList(posSecondIteration));
+				positionInMaze = placeholder.toArray(new PositionInMaze[]{});
+
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
 		}
 
-		void moveOutOfMaze(PositionInMaze[] pos) {
+		void joinMaze() {
 
-			for (PositionInMaze po : pos) {
+			for (PositionInMaze po : positionInMaze) {
 				try {
 					talkToServerInterface.sendPosition(clientId, po);
 					clientPositions = talkToServerInterface.getAllClientPositions();
@@ -212,6 +222,10 @@ public class Maze extends Applet {
 					e.printStackTrace();
 				}
 			}
+
+
+
+
 		}
 	}
 
