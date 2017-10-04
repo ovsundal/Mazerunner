@@ -1,6 +1,5 @@
 package mazeoblig;
 
-import javafx.geometry.Pos;
 import simulator.PositionInMaze;
 import simulator.VirtualUser;
 
@@ -23,13 +22,7 @@ import java.applet.*;
  */
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
@@ -54,6 +47,7 @@ public class Maze extends Applet {
 
 	private TalkToServerInterface talkToServerInterface;
 	private HashMap clientPositions = null;
+	private final int CLIENTS_TO_CREATE = 3;
 
 	/**
 	 * Setup server and registry connection and retrieves all remote objects from RMI server
@@ -100,12 +94,16 @@ public class Maze extends Applet {
 	}
 
 	/**
-	 * Create clients and populate maze
+	 * Creates clients, mapupdater and populate maze
 	 */
 	public void start() {
 
-		CreateClients clients = new CreateClients(1);
-		clients.run();
+		for(int i = 0; i < CLIENTS_TO_CREATE; i++) {
+			CreateClient populateMaze = new CreateClient();
+			populateMaze.start();
+		}
+		RequestMapUpdate mapUpdater = new RequestMapUpdate();
+		mapUpdater.start();
 	}
 
 	//Get a parameter value
@@ -164,68 +162,46 @@ public class Maze extends Applet {
 
 				});
 			}
-
-		System.out.println("Paint was called");
-	}
-
-	/**
-	 * Class used for creating a new client
-	 */
-	class Client {
-
-		private int clientId;
-		private VirtualUser virtualUser;
-		private PositionInMaze[] positionInMaze;
-
-		Client(Box[][] maze) {
-			try {
-				virtualUser = new VirtualUser(maze);
-				clientId = talkToServerInterface.getClientId();
-				PositionInMaze[] posFirstIteration = virtualUser.getFirstIterationLoop();
-				PositionInMaze[] posSecondIteration = virtualUser.getIterationLoop();
-
-				//merge arrays
-				Collection<PositionInMaze> placeholder = new ArrayList<>();
-				placeholder.addAll(Arrays.asList(posFirstIteration));
-				placeholder.addAll(Arrays.asList(posSecondIteration));
-				positionInMaze = placeholder.toArray(new PositionInMaze[]{});
-
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-
-		void joinMaze() {
-			System.out.println("a client joined the maze");
-			for (PositionInMaze po : positionInMaze) {
-				try {
-					talkToServerInterface.sendPosition(clientId, po);
-					clientPositions = talkToServerInterface.getAllClientPositions();
-					paint(getGraphics());
-					System.out.println("From server: " + clientPositions.get(clientId));
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	/**
 	 * class used for creating n clients using threads
 	 */
-	class CreateClients extends Thread {
+	private class CreateClient extends Thread {
 
-		ExecutorService threadPool;
-		int numberOfClients;
-
-		CreateClients(int numberOfClients) {
-			this.numberOfClients = numberOfClients;
-		}
+		CreateClient() {}
 
 		public void run() {
 
-			threadPool = Executors.newFixedThreadPool(numberOfClients);
-			threadPool.execute(() -> new Client(maze).joinMaze());
+			try {
+				VirtualUser user = new VirtualUser(maze,talkToServerInterface);
+
+				while (true) {
+					user.nextPosition();
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class RequestMapUpdate extends Thread {
+		public void run() {
+			try {
+				while(true) {
+					sleep(100);
+					talkToServerInterface.sendAllClientPositions();
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

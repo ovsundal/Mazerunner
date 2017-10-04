@@ -1,27 +1,30 @@
 package simulator;
 
 import mazeoblig.Box;
+import mazeoblig.TalkToServerInterface;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Random;
 import java.util.Stack;
 import java.util.Arrays;
 /**
  * Instansen av denne klassen tilbyr i praksis tre metoder til programmereren. Disse er:
  * <p>
- * a. Konstruktøren (som tar imot en Maze som parameter<br>
+ * a. Konstruktï¿½ren (som tar imot en Maze som parameter<br>
  * b. getFirstIterationLoop() som returnerer en rekke med posisjoner i Maze som finner veien<br>
- *    ut av Maze og reposisjonerer "spilleren" ved starten av Maze basert på en tilfeldig <br>
+ *    ut av Maze og reposisjonerer "spilleren" ved starten av Maze basert pï¿½ en tilfeldig <br>
  *    posisjonering av spilleren i Maze<br>
  * c. getIterationLoop() som returnerer en rekke med posisjoner i Maze som finner veien<br>
- *    ut av Maze (fra inngangen) og reposisjonerer "spileren" ved starten av Maze på nytt<br>
+ *    ut av Maze (fra inngangen) og reposisjonerer "spileren" ved starten av Maze pï¿½ nytt<br>
  * <p>
- * Ideen er at programmereren skal kunne benytte disse ferdig definerte posisjonene til å simulere
+ * Ideen er at programmereren skal kunne benytte disse ferdig definerte posisjonene til ï¿½ simulere
  * hvordan en bruker forflytter seg i en labyrint.
  *     
  * @author asd
  *
  */
-public class VirtualUser {
+public class VirtualUser extends UnicastRemoteObject implements CallbackInterface {
 
 	/**
 	 * BugFix: 07.10.2013 - Fikset problem med at VirtualUser i enkelt tilfeller posisjonerer seg selv 
@@ -37,15 +40,21 @@ public class VirtualUser {
 
 	
 	private Stack <PositionInMaze> myWay = new Stack<PositionInMaze>();
-	private PositionInMaze [] FirstIteration; 
-	private PositionInMaze [] NextIteration; 
+	private PositionInMaze [] firstIteration;
+	private PositionInMaze [] nextIteration;
+	private int clientId;
+	private TalkToServerInterface serverInterface;
+	private PositionInMaze[] itinerary;
+	private int totalPositionsMoved = 0;
 
 	/**
-	 * Konstruktør
+	 * Konstruktï¿½r
 	 * @param maze
 	 */
-	public VirtualUser(Box[][] maze) {
+	public VirtualUser(Box[][] maze, TalkToServerInterface serverInterface) throws RemoteException {
+		super();
 		this.maze = maze;
+		this.serverInterface = serverInterface;
 		dim = maze[0].length;
 		init();
 	}
@@ -60,52 +69,63 @@ public class VirtualUser {
 		xp = rand.nextInt(dim - 2) + 1;
 		yp = rand.nextInt(dim - 2) + 1;
 
-		// Løser veien ut av labyrinten basert på tilfeldig inngang ...
+		//get id from server
+		try {
+			System.out.println(this);
+			clientId = serverInterface.setClientId(this);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		// Lï¿½ser veien ut av labyrinten basert pï¿½ tilfeldig inngang ...
 		makeFirstIteration();
-		// og deretter løses labyrinten basert på inngang fra starten 
+		// og deretter lï¿½ses labyrinten basert pï¿½ inngang fra starten 
 		makeNextIteration();
+
+		//merge both iterations
+		itinerary = VirtualUser.concat(firstIteration, nextIteration);
 	}
 	
 	/**
-	 * Løser maze ut fra en tilfeldig posisjon i maze
+	 * Lï¿½ser maze ut fra en tilfeldig posisjon i maze
 	 */
 	private void solveMaze() {
 		found = false;
-		// Siden posisjonen er tilfeldig valgt risikerer man at man kjører i en brønn
+		// Siden posisjonen er tilfeldig valgt risikerer man at man kjï¿½rer i en brï¿½nn
 		// Av denne grunn .... det er noe galt med kallet under
 		myWay.push(new PositionInMaze(xp, yp));
 		backtrack(maze[xp][yp], maze[1][0]);
 	}
 
 	/**
-	 * Selve backtracking-algoritmen som brukes for å finne løsningen
+	 * Selve backtracking-algoritmen som brukes for ï¿½ finne lï¿½sningen
 	 * @param b Box
 	 * @param from Box
 	 */
 	private void backtrack(Box b, Box from) {
-		// Aller først - basistilfellet, slik at vi kan returnere
-		// Under returen skrives det med Rødt
+		// Aller fï¿½rst - basistilfellet, slik at vi kan returnere
+		// Under returen skrives det med Rï¿½dt
 		if ((xp == dim - 2) && (yp == dim - 2)) {
 			found = true;
 			// Siden vi tegner den "riktige" veien under returen opp gjennom
-			// Java's runtime-stack, så legger vi utgang inn sist ...
+			// Java's runtime-stack, sï¿½ legger vi utgang inn sist ...
 			return;
 		}
-		// Henter boksene som det finnes veier til fra den boksen jeg står i
+		// Henter boksene som det finnes veier til fra den boksen jeg stï¿½r i
 		Box [] adj = b.getAdjecent();
-		// Og sjekker om jeg kan gå de veiene
+		// Og sjekker om jeg kan gï¿½ de veiene
 		for (int i = 0; i < adj.length; i++) {
 			// Hvis boksen har en utganger som ikke er lik den jeg kom fra ...
 			if (!(adj[i].equals(from))) {
 				adjustXYBeforeBacktrack(b, adj[i]);
 				myWay.push(new PositionInMaze(xp, yp));
 				backtrack(adj[i], b);
-				// Hvis algoritmen har funnet veien ut av labyrinten, så inneholder stacken (myWay) 
+				// Hvis algoritmen har funnet veien ut av labyrinten, sï¿½ inneholder stacken (myWay) 
 				// veien fra det tilfeldige startpunktet og ut av labyrinten
 				if (!found) myWay.pop();
 				adjustXYAfterBacktrack(b, adj[i]);
 			}
-			// Hvis veien er funnet, er det ingen grunn til å fortsette
+			// Hvis veien er funnet, er det ingen grunn til ï¿½ fortsette
 			if (found) {
 				break;
 			}
@@ -113,7 +133,7 @@ public class VirtualUser {
 	}
 
 	/**
-	 * Oppdatere x og y i labyrinten før backtracking kalles
+	 * Oppdatere x og y i labyrinten fï¿½r backtracking kalles
 	 * @param from Box
 	 * @param to Box
 	 */
@@ -149,14 +169,14 @@ public class VirtualUser {
 	}
 
 	/**
-	 * Returnerer posisjonene som gir en vei rundt maze, tilfeldig valgt - mot høyre eller mot venstre
+	 * Returnerer posisjonene som gir en vei rundt maze, tilfeldig valgt - mot hï¿½yre eller mot venstre
 	 * @return [] PositionInMaze;
 	 */
 	private PositionInMaze [] roundAbout() {
 		PositionInMaze [] pos = new PositionInMaze[dim * 2];
 		int j = 0;
 		pos[j++] = new PositionInMaze(dim - 2, dim - 1);
-		// Vi skal enten gå veien rundt mot høyre ( % 2 == 0)
+		// Vi skal enten gï¿½ veien rundt mot hï¿½yre ( % 2 == 0)
 		// eller mot venstre
 		if (System.currentTimeMillis() % 2 == 0) { 
 			for (int i = dim - 1; i >= 0; i--)
@@ -170,12 +190,12 @@ public class VirtualUser {
 			for (int i = dim - 1; i >= 0; i--)
 				pos[j++] = new PositionInMaze(0, i);
 		}
-		// Uansett, så returneres resultatet
+		// Uansett, sï¿½ returneres resultatet
 		return pos;
 	}
 
 	/**
-	 * Løser hele maze, fra startposisjonen
+	 * Lï¿½ser hele maze, fra startposisjonen
 	 * @return
 	 */
 	@SuppressWarnings("unused")
@@ -194,7 +214,7 @@ public class VirtualUser {
 	private void makeFirstIteration() {
 		PositionInMaze [] outOfMaze = solve();
 		PositionInMaze [] backToStart = roundAbout();
-		FirstIteration = VirtualUser.concat(outOfMaze, backToStart);
+		firstIteration = VirtualUser.concat(outOfMaze, backToStart);
 	}
 
 	/**
@@ -202,16 +222,16 @@ public class VirtualUser {
 	 * rundt og frem til inngangen av labyrinten igjen
 	 */
 	private void makeNextIteration() {
-		// Tvinger posisjonen til å være ved inngang av Maze
+		// Tvinger posisjonen til ï¿½ vï¿½re ved inngang av Maze
 		xp = 1; yp = 1;
 		myWay = new Stack<PositionInMaze>();
 		PositionInMaze [] outOfMaze = solve();
 		PositionInMaze [] backToStart = roundAbout();
-		NextIteration = VirtualUser.concat(outOfMaze, backToStart);
+		nextIteration = VirtualUser.concat(outOfMaze, backToStart);
 	}
 
 	/**
-	 * Generisk metode som slår sammen to arrayer av samme type
+	 * Generisk metode som slï¿½r sammen to arrayer av samme type
 	 * @param <T>
 	 * @param first
 	 * @param second
@@ -225,21 +245,43 @@ public class VirtualUser {
 
 	/**
 	 * Returnerer en PositionInMaze [] som inneholder x- og y-posisjonene som 
-	 * en virituell spiller benytter for å finne veien ut av labyrinten ut fra
+	 * en virituell spiller benytter for ï¿½ finne veien ut av labyrinten ut fra
 	 * inngangen i labyrinten.
 	 * @return
 	 */
 	public PositionInMaze [] getIterationLoop() {
-		return NextIteration;
+		return nextIteration;
 	}
 
 	/**
 	 * Returnerer en PositionInMaze [] som inneholder x- og y-posisjonene som 
-	 * en virituell spiller benytter for å finne veien ut av labyrinten ut fra
+	 * en virituell spiller benytter for ï¿½ finne veien ut av labyrinten ut fra
 	 * en tilfedlig generert startposisjon i labyrinten.
 	 * @return
 	 */
 	public PositionInMaze [] getFirstIterationLoop() {
-		return FirstIteration;
+		return firstIteration;
+	}
+
+	@Override
+	public Integer getClientId() throws RemoteException {
+		return clientId;
+	}
+
+	/**
+	 * Moves the client to next position in itinerary and informs server
+	 */
+	public void nextPosition() {
+
+		try {
+			serverInterface.sendPosition(clientId, itinerary[totalPositionsMoved]);
+
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		totalPositionsMoved++;
+		if(totalPositionsMoved >= itinerary.length ) {
+			System.exit(1);
+		}
 	}
 }
