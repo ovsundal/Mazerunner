@@ -43,12 +43,19 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
         }
     }
 
+    /**
+     * Iterate through the list of clients and send all positions to clients registered in cb-interface.
+     * @throws RemoteException
+     */
     @Override
     public void sendAllClientPositions() throws RemoteException {
 
-        for(Map.Entry<Integer, CallbackInterface> entry : clientList.entrySet())
-            //fortsett her, bruk cb interface for å levere listen til alle klienter !!!!!!!!!!!!!!!!!!!!
-            System.out.println("positions called");
+        for(HashMap.Entry<Integer, CallbackInterface> entry : clientList.entrySet()) {
+            entry.getValue().updateMap(clientPositions);
+
+        }
+
+        System.out.println("positions called");
     }
 
 

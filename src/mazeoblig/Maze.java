@@ -99,11 +99,10 @@ public class Maze extends Applet {
 	public void start() {
 
 		for(int i = 0; i < CLIENTS_TO_CREATE; i++) {
-			CreateClient populateMaze = new CreateClient();
-			populateMaze.start();
+			new CreateClient().start();
 		}
-		RequestMapUpdate mapUpdater = new RequestMapUpdate();
-		mapUpdater.start();
+		new RequestMapUpdate().start();
+
 	}
 
 	//Get a parameter value

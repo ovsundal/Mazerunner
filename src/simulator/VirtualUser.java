@@ -1,10 +1,12 @@
 package simulator;
 
 import mazeoblig.Box;
+import mazeoblig.RMIServer;
 import mazeoblig.TalkToServerInterface;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Stack;
 import java.util.Arrays;
@@ -46,6 +48,7 @@ public class VirtualUser extends UnicastRemoteObject implements CallbackInterfac
 	private TalkToServerInterface serverInterface;
 	private PositionInMaze[] itinerary;
 	private int totalPositionsMoved = 0;
+	private HashMap<Integer, PositionInMaze> listOfAllPosition;
 
 	/**
 	 * Konstrukt�r
@@ -267,6 +270,21 @@ public class VirtualUser extends UnicastRemoteObject implements CallbackInterfac
 	public Integer getClientId() throws RemoteException {
 		return clientId;
 	}
+
+	/**
+	 * Receives a list of all client positions from callback interface
+	 * @param listOfAllPosition - All current client positions
+	 * @throws RemoteException
+	 */
+	@Override
+	public void updateMap(HashMap<Integer, PositionInMaze> listOfAllPosition) throws RemoteException {
+		this.listOfAllPosition = listOfAllPosition;
+	}
+
+	public HashMap<Integer, PositionInMaze> getListOfAllPosition() {
+		return listOfAllPosition;
+	}
+
 
 	/**
 	 * Moves the client to next position in itinerary and informs server
