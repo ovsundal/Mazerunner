@@ -24,6 +24,8 @@ import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 import java.util.HashMap;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
  * RMIServer p� sin side  henter st�rrelsen fra definisjonen i Maze
@@ -47,7 +49,7 @@ public class Maze extends Applet {
 
 	private TalkToServerInterface talkToServerInterface;
 	private HashMap clientPositions = null;
-	private final int CLIENTS_TO_CREATE = 3;
+	private final int CLIENTS_TO_CREATE = 5;
 
 
 	/**
@@ -100,7 +102,13 @@ public class Maze extends Applet {
 	public void start() {
 
 		for(int i = 0; i < CLIENTS_TO_CREATE; i++) {
-			new CreateClient().start();
+
+			try {
+				new CreateClient().start();
+				sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		new RequestMapUpdate().start();
 
@@ -155,7 +163,7 @@ public class Maze extends Applet {
 					g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
 
 					try {
-						Thread.sleep(100);
+						sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -178,10 +186,14 @@ public class Maze extends Applet {
 
 				while (true) {
 					user.nextPosition();
-					clientPositions = user.getListOfAllPosition();
-					repaint();
+
+					if(user.getClientId() == 0) {
+						clientPositions = user.getListOfAllPosition();
+						repaint();
+					}
+
 					try {
-						Thread.sleep(500);
+						sleep(200);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
