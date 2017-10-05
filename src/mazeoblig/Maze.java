@@ -37,7 +37,7 @@ public class Maze extends Applet {
 
 	private BoxMazeInterface bm;
 	private Box[][] maze;
-	public static int DIM = 10;
+	public static int DIM = 30;
 	private int dim = DIM;
 
 	static int xp;
@@ -145,13 +145,13 @@ public class Maze extends Applet {
 		for (x = 1; x < (dim - 1); ++x)
 			for (y = 1; y < (dim - 1); ++y) {
 				if (maze[x][y].getUp() == null)
-					g.drawLine(x * 50, y * 50, x * 50 + 50, y * 50);
+					g.drawLine(x * 10, y * 10, x * 10 + 10, y * 10);
 				if (maze[x][y].getDown() == null)
-					g.drawLine(x * 50, y * 50 + 50, x * 50 + 50, y * 50 + 50);
+					g.drawLine(x * 10, y * 10 + 10, x * 10 + 10, y * 10 + 10);
 				if (maze[x][y].getLeft() == null)
-					g.drawLine(x * 50, y * 50, x * 50, y * 50 + 50);
+					g.drawLine(x * 10, y * 10, x * 10, y * 10 + 10);
 				if (maze[x][y].getRight() == null)
-					g.drawLine(x * 50 + 50, y * 50, x * 50 + 50, y * 50 + 50);
+					g.drawLine(x * 10 + 10, y * 10, x * 10 + 10, y * 10 + 10);
 			}
 
 			if(clientPositions != null) {
@@ -160,7 +160,7 @@ public class Maze extends Applet {
 
 					PositionInMaze pos = (PositionInMaze) value;
 
-					g.drawOval(pos.getXpos() * 50, pos.getYpos() * 50, 50, 50);
+					g.drawOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
 
 					try {
 						sleep(100);
