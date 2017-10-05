@@ -6,7 +6,6 @@ import simulator.PositionInMaze;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Class responsible for client-server-client communication
@@ -50,12 +49,14 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
     @Override
     public void sendAllClientPositions() throws RemoteException {
 
-        for(HashMap.Entry<Integer, CallbackInterface> entry : clientList.entrySet()) {
-            entry.getValue().updateMap(clientPositions);
+        clientList.forEach((key, value) -> {
+            try {
+                value.updateMap(clientPositions);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
 
-        }
-
-        System.out.println("positions called");
     }
 
 
