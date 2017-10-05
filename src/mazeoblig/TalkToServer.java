@@ -28,8 +28,9 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
      */
     @Override
     public void sendPosition(int id, PositionInMaze pos) throws RemoteException {
+        synchronized (clientPositions) {
             clientPositions.put(id, pos);
-        System.out.println("Client id " + id + " added position");
+        }
     }
 
     @Override
@@ -48,17 +49,16 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
      */
     @Override
     public void sendAllClientPositions() throws RemoteException {
-
-        clientList.forEach((key, value) -> {
-            try {
-                value.updateMap(clientPositions);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+        synchronized (clientList) {
+            synchronized (clientPositions) {
+                clientList.forEach((key, value) -> {
+                    try {
+                        value.updateMap(clientPositions);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
-        });
-
+        }
     }
-
-
-
 }
