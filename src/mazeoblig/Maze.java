@@ -49,7 +49,7 @@ public class Maze extends Applet {
 
 	private TalkToServerInterface talkToServerInterface;
 	private HashMap clientPositions = null;
-	private final int CLIENTS_TO_CREATE = 5;
+	private final int CLIENTS_TO_CREATE = 15;
 
 
 	/**
@@ -161,13 +161,6 @@ public class Maze extends Applet {
 					PositionInMaze pos = (PositionInMaze) value;
 
 					g.drawOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
-
-					try {
-						sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-
 				});
 			}
 	}
