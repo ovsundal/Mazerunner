@@ -49,6 +49,7 @@ public class Maze extends Applet {
 	private HashMap clientPositions = null;
 	private final int CLIENTS_TO_CREATE = 3;
 
+
 	/**
 	 * Setup server and registry connection and retrieves all remote objects from RMI server
 	 */
@@ -177,6 +178,8 @@ public class Maze extends Applet {
 
 				while (true) {
 					user.nextPosition();
+					clientPositions = user.getListOfAllPosition();
+					repaint();
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
