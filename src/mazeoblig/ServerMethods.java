@@ -14,29 +14,13 @@ import java.util.HashMap;
 public class ServerMethods extends UnicastRemoteObject implements ServerInterface {
 
     private int clientId = 0;
-    private HashMap<Integer, PositionInMaze> clientPositions = new HashMap<>();
     private HashMap<Integer, ClientCallbackInterface> clientList = new HashMap<>();
-    private HashMap<Integer, Color> clientColors = new HashMap<Integer, Color>();
     private HashMap<Integer, InformationObject> informationObjectHashMap = new HashMap<>();
+    private int amountClientMessagesReceived = 0;
+    private int amountClientMessagesSent = 0;
 
 
-    protected ServerMethods() throws RemoteException {
-    }
-
-
-
-
-    /**
-     * Method collects new client positions and appends them to list
-
-     * @throws RemoteException
-     */
-//    @Override
-//    public void sendPosition(int id, PositionInMaze pos) throws RemoteException {
-//        synchronized (clientPositions) {
-//            clientPositions.put(id, pos);
-//        }
-//    }
+    protected ServerMethods() throws RemoteException {}
 
     @Override
     public Integer setClientId(ClientCallbackInterface cb) throws RemoteException {
@@ -49,54 +33,26 @@ public class ServerMethods extends UnicastRemoteObject implements ServerInterfac
     }
 
     /**
-     * Iterate through the list of clients and send all positions to clients registered in cb-interface.
-     * @throws RemoteException
-     */
-    @Override
-    public void sendAllClientPositions() throws RemoteException {
-        synchronized (clientList) {
-            synchronized (clientPositions) {
-                clientList.forEach((key, value) -> {
-                    try {
-                        value.updateMap(clientPositions);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        }
-    }
-
-//    @Override
-//    public void sendClientColors(int id, Color color) throws RemoteException {
-//        synchronized (clientColors) {
-//            clientColors.put(id, color);
-//        }
-//    }
-
-    @Override
-    public HashMap requestClientColors() throws RemoteException {
-        return clientColors;
-    }
-
-    /**
      * All information server RECEIVES FROM client is provided by information object in this method.
      * This method stores it in server
      * @param object
      * @throws RemoteException
      */
     @Override
-    public void sendInformationObjectToServer(InformationObject object) throws RemoteException {
+    public void sendInformationObjectFromClientToServer(InformationObject object) throws RemoteException {
         synchronized (clientList) {
             synchronized (informationObjectHashMap) {
+
+                amountClientMessagesReceived++;
 
                 //register client and callbackinterface if it doesn't exist
                 if(!clientList.containsKey(object.getClientId())) {
                     clientList.put(object.getClientId(), object.getClientCallbackInterface());
                 }
 
-                //update the object with data from the server
-                //SERVERINFO HERE
+                //update the informationObject with data produced by the server
+                object.setTotalClientMessagesSent(amountClientMessagesSent);
+                object.setTotalServerMessagesReceived(amountClientMessagesReceived);
 
                 //store it on the server
                 informationObjectHashMap.put(object.getClientId(), object);
@@ -111,14 +67,17 @@ public class ServerMethods extends UnicastRemoteObject implements ServerInterfac
      * @throws RemoteException
      */
     @Override
-    public InformationObject receiveInformationObject() throws RemoteException {
+    public InformationObject sendUpdatedInformationObjectFromServerToClient() throws RemoteException {
         synchronized (clientList) {
             synchronized (informationObjectHashMap) {
 
-                //send all stored information objects to all registered clients
                 clientList.forEach((id, client) -> {
                     try {
+
+                        //send all stored information objects to all registered clients
                         client.receiveInformationObjectFromServer(informationObjectHashMap);
+                        amountClientMessagesSent++;
+
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }

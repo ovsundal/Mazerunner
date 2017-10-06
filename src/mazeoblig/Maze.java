@@ -46,6 +46,7 @@ public class Maze extends Applet {
     private HashMap clientColors = null;
     private final int CLIENTS_TO_CREATE = 20;
     private Integer mapDrawingClientId;
+    long timeStart = System.currentTimeMillis();
 
 
     /**
@@ -119,7 +120,6 @@ public class Maze extends Applet {
         g.clearRect(0, 0, getWidth(), getHeight());
 
         // Draw the map
-
         for (x = 1; x < (dim - 1); ++x)
             for (y = 1; y < (dim - 1); ++y) {
                 if (maze[x][y].getUp() == null)
@@ -135,16 +135,32 @@ public class Maze extends Applet {
             //if client positions does exist, render the clients into the map
         if (clientPositions != null) {
 
+            int totalReceivedMessagesByServer = clientPositions.get(mapDrawingClientId).getTotalServerMessagesReceived();
+            int totalSentMessagesByServer = clientPositions.get(mapDrawingClientId).getTotalClientMessagesSent();
+            //calculate messages/second
+            long timeDeltaInSeconds =  (System.currentTimeMillis() - timeStart) / 1000;
+
+            //add server statistics to applet
+            g.drawString("Total messages server has received: " + totalReceivedMessagesByServer, 0, 330);
+
+            g.drawString("Total messages sent from server: " + totalSentMessagesByServer, 0, 345);
+
+            g.drawString("---------------------", 0, 360);
+
+            g.drawString("RECEIVED / SECOND: " +totalReceivedMessagesByServer / timeDeltaInSeconds,
+                    0, 375);
+
+            g.drawString("SENT / SECOND: " +totalSentMessagesByServer / timeDeltaInSeconds,
+                    0, 390);
+
             //draw client positions
             clientPositions.forEach((key, value) -> {
-
 
                 PositionInMaze pos = value.getPosition();
                 Color color = value.getColor();
 
                     g.setColor(color);
                     g.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
-
             });
         }
     }
@@ -172,9 +188,8 @@ public class Maze extends Applet {
 
                     user.sendInfoToServer();
 
-
-                    //if the user is the mapdrawerclient, copy all data the client received from server to the Maze
-                    // class, and repaint the map
+                    //if user is the mapdrawerclient, copy all data the client newly received from server to the Maze
+                    // class, and repaint the map using this data
                     if (user.getClientId().equals(mapDrawingClientId)) {
 
                         clientPositions = user.getInfoFromAllClients();
@@ -203,7 +218,7 @@ public class Maze extends Applet {
 
                 while (true) {
                     sleep(100);
-                    serverInterface.receiveInformationObject();
+                    serverInterface.sendUpdatedInformationObjectFromServerToClient();
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();

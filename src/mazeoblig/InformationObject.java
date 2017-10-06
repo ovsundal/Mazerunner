@@ -5,7 +5,6 @@ import simulator.PositionInMaze;
 import java.awt.*;
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 
 public class InformationObject implements Serializable {
@@ -20,7 +19,7 @@ public class InformationObject implements Serializable {
     private int timeSinceServerStarted;
     private int totalServerMessagesReceived;
     private int totalClientMessagesSent;
-    HashMap<Integer, InformationObject> listOfAllClientPositions;
+    private HashMap<Integer, InformationObject> listOfAllClientPositions;
 
     public InformationObject(ClientCallbackInterface cb, Color color) throws RemoteException {
         super();
@@ -29,10 +28,6 @@ public class InformationObject implements Serializable {
 
     public Color getColor() {
         return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
     }
 
     public PositionInMaze getPosition() {

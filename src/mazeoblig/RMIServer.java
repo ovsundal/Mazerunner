@@ -133,5 +133,5 @@ public class RMIServer
          System.out.println( "" + abe );
       }
       System.out.println("RMIRegistry on " + HOST_NAME + ":" + PORT + "\n----------------------------");
-   }  // main
-}  // class RMIServer
+   }
+}

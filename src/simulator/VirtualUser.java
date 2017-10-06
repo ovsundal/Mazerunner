@@ -41,16 +41,13 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	static int yp;
 	static boolean found = false;
 
-	
-	private Stack <PositionInMaze> myWay = new Stack<PositionInMaze>();
+	private Stack <PositionInMaze> myWay = new Stack<>();
 	private PositionInMaze [] firstIteration;
 	private PositionInMaze [] nextIteration;
-	private Integer clientId;
 	private ServerInterface serverInterface;
 	private PositionInMaze[] itinerary;
 	private int totalPositionsMoved = 0;
 	private HashMap<Integer, PositionInMaze> listOfAllPosition;
-//	private Color color;
 	private InformationObject informationObject = null;
 	private HashMap<Integer, InformationObject> infoFromAllClients = null;
 
@@ -63,14 +60,11 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		this.maze = maze;
 		this.serverInterface = serverInterface;
 		dim = maze[0].length;
-//		this.color = new Color(new Random().nextInt(0xFFFFFF));
 		Color randomColor =new Color(new Random().nextInt(0xFFFFFF));
 
 		//create information object with callbackinterface and random color
 		this.informationObject = new InformationObject(this, randomColor);
 		init();
-
-
 	}
 	/**
 	 * Initsierer en tilfeldig posisjon i labyrint
@@ -267,16 +261,6 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Receives a list of all client positions from callback interface
-	 * @param listOfAllPosition - All current client positions
-	 * @throws RemoteException
-	 */
-	@Override
-	public void updateMap(HashMap<Integer, PositionInMaze> listOfAllPosition) throws RemoteException {
-		this.listOfAllPosition = listOfAllPosition;
-	}
-
-	/**
 	 * When client receives an updated information object with info from all clients from server, store it
 	 * @param objectHashMap
 	 * @throws RemoteException
@@ -285,18 +269,6 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	public void receiveInformationObjectFromServer(HashMap<Integer, InformationObject> objectHashMap) throws RemoteException {
 		setInfoFromAllClients(objectHashMap);
 	}
-
-	/**
-	 * Client receives the information object back from server with updated info
-
-	 * @throws RemoteException
-	 */
-
-
-	public HashMap<Integer, PositionInMaze> getListOfAllPosition() {
-		return listOfAllPosition;
-	}
-
 
 	/**
 	 * Moves the client to next position in itinerary and informs server
@@ -309,7 +281,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 
 		//send information object to server
 		try {
-			serverInterface.sendInformationObjectToServer(informationObject);
+			serverInterface.sendInformationObjectFromClientToServer(informationObject);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -328,18 +300,4 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	public void setInfoFromAllClients(HashMap<Integer, InformationObject> infoFromAllClients) {
 		this.infoFromAllClients = infoFromAllClients;
 	}
-
-	public InformationObject getInformationObject() {
-		return informationObject;
-	}
-
-	//	public void sendClientColor() {
-//		try {
-//			serverInterface.sendClientColors(clientId, color);
-//		} catch (RemoteException e) {
-//			e.printStackTrace();
-//		}
-//	}
-
-
 }
