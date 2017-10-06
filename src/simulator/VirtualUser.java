@@ -44,7 +44,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	private Stack <PositionInMaze> myWay = new Stack<PositionInMaze>();
 	private PositionInMaze [] firstIteration;
 	private PositionInMaze [] nextIteration;
-	private int clientId;
+	private Integer clientId;
 	private ServerInterface serverInterface;
 	private PositionInMaze[] itinerary;
 	private int totalPositionsMoved = 0;
@@ -76,8 +76,12 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 
 		//get id from server
 		try {
-			System.out.println(this);
-			clientId = serverInterface.setClientId(this);
+			//if clientId exists, client has finished traversing the maze and this is called during
+			// creation of a new itinerary. No need to change id
+			if(clientId == null) {
+				clientId = serverInterface.setClientId(this);
+			}
+
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -291,7 +295,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	/**
 	 * Moves the client to next position in itinerary and informs server
 	 */
-	public void sendClientPosition() {
+	public void sendClientPosition() throws RemoteException {
 
 		try {
 			serverInterface.sendPosition(clientId, itinerary[totalPositionsMoved]);
@@ -300,9 +304,10 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 			e.printStackTrace();
 		}
 		totalPositionsMoved++;
-		//client have traversed the entire path, remove from game
+		//client have traversed the entire maze, reset travel path
 		if(totalPositionsMoved >= itinerary.length ) {
-//			System.exit(1);
+			totalPositionsMoved = 0;
+			init();
 		}
 	}
 

@@ -29,62 +29,57 @@ import static java.lang.Thread.sleep;
 /**
  * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
  * RMIServer p� sin side  henter st�rrelsen fra definisjonen i Maze
- * @author asd
  *
+ * @author asd
  */
 @SuppressWarnings("serial")
 public class Maze extends Applet {
 
-	private BoxMazeInterface bm;
-	private Box[][] maze;
-	public static int DIM = 30;
-	private int dim = DIM;
-
-	static int xp;
-	static int yp;
-	static boolean found = false;
-
-	private String server_hostname;
-	private int server_portnumber;
-
-	private ServerInterface serverInterface;
-	private HashMap clientPositions = null;
-	private HashMap clientColors = null;
-	private final int CLIENTS_TO_CREATE = 15;
+    private BoxMazeInterface bm;
+    private Box[][] maze;
+    public static int DIM = 30;
+    private int dim = DIM;
+    private String server_hostname;
+    private int server_portnumber;
+    private ServerInterface serverInterface;
+    private HashMap clientPositions = null;
+    private HashMap clientColors = null;
+    private final int CLIENTS_TO_CREATE = 20;
+    private Integer mapDrawingClientId;
 
 
-	/**
-	 * Setup server and registry connection and retrieves all remote objects from RMI server
-	 */
-	public void init() {
-		int size = dim;
-		/*
+    /**
+     * Establish server and registry connection. Retrieve all remote objects from RMI server
+     */
+    public void init() {
+        int size = dim;
+        /*
 		 ** Kobler opp mot RMIServer, under forutsetning av at disse
 		 ** kj�rer p� samme maskin. Hvis ikke m� oppkoblingen
 		 ** skrives om slik at dette passer med virkeligheten.
 		 */
-		if (server_hostname == null)
-			server_hostname = RMIServer.getHostName();
-		if (server_portnumber == 0)
-			server_portnumber = RMIServer.getRMIPort();
-		try {
-			java.rmi.registry.Registry r = java.rmi.registry.LocateRegistry.
-					getRegistry(server_hostname,
-							server_portnumber);
+        if (server_hostname == null)
+            server_hostname = RMIServer.getHostName();
+        if (server_portnumber == 0)
+            server_portnumber = RMIServer.getRMIPort();
+        try {
+            java.rmi.registry.Registry r = java.rmi.registry.LocateRegistry.
+                    getRegistry(server_hostname,
+                            server_portnumber);
 
 			/*
 			 ** Henter inn referansen til Labyrinten (ROR)
 			 */
-			bm = (BoxMazeInterface) r.lookup(RMIServer.MazeName);
-			maze = bm.getMaze();
+            bm = (BoxMazeInterface) r.lookup(RMIServer.MazeName);
+            maze = bm.getMaze();
 
-			//Henter referansen til ServerInterface metoder
-			serverInterface = (ServerInterface) r.lookup(RMIServer.talkToServerIdString);
+            //Henter referansen til ServerInterface metoder
+            serverInterface = (ServerInterface) r.lookup(RMIServer.talkToServerIdString);
 
-		} catch (RemoteException e) {
-			System.err.println("Remote Exception: " + e.getMessage());
-			System.exit(0);
-		} catch (NotBoundException f) {
+        } catch (RemoteException e) {
+            System.err.println("Remote Exception: " + e.getMessage());
+            System.exit(0);
+        } catch (NotBoundException f) {
 			/*
 			 ** En exception her er en indikasjon p� at man ved oppslag (lookup())
 			 ** ikke finner det objektet som man s�ker.
@@ -92,133 +87,130 @@ public class Maze extends Applet {
 			 ** at hvis hostname ikke er OK (RMIServer gir da feilmelding under
 			 ** oppstart) kan v�re en �rsak.
 			 */
-			System.err.println("Not Bound Exception: " + f.getMessage());
-			System.exit(0);
-		}
-	}
+            System.err.println("Not Bound Exception: " + f.getMessage());
+            System.exit(0);
+        }
+    }
 
-	/**
-	 * Creates clients, mapupdater and populate maze
-	 */
-	public void start() {
+    /**
+     * Creates clients, mapupdater and populates maze
+     */
+    public void start() {
 
-		for(int i = 0; i < CLIENTS_TO_CREATE; i++) {
+        for (int i = 0; i < CLIENTS_TO_CREATE; i++) {
 
-			try {
-				new CreateClient().start();
-				sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		new RequestMapUpdate().start();
+            try {
+                new CreateClient().start();
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        new RequestMapUpdate().start();
+    }
 
-	}
+    /**
+     * Render the maze and registered clients
+     */
+    public void paint(Graphics g) {
+        int x, y;
 
-	//Get a parameter value
-	public String getParameter(String key, String def) {
-		return getParameter(key) != null ? getParameter(key) : def;
-	}
+        //clear the previous map
+        g.clearRect(0, 0, getWidth(), getHeight());
 
-	//Get Applet information
-	public String getAppletInfo() {
-		return "Applet Information";
-	}
+        // Draw the map
 
-	//Get parameter info
-	public String[][] getParameterInfo() {
-		java.lang.String[][] pinfo = {{"Size", "int", ""},
-		};
-		return pinfo;
-	}
+        for (x = 1; x < (dim - 1); ++x)
+            for (y = 1; y < (dim - 1); ++y) {
+                if (maze[x][y].getUp() == null)
+                    g.drawLine(x * 10, y * 10, x * 10 + 10, y * 10);
+                if (maze[x][y].getDown() == null)
+                    g.drawLine(x * 10, y * 10 + 10, x * 10 + 10, y * 10 + 10);
+                if (maze[x][y].getLeft() == null)
+                    g.drawLine(x * 10, y * 10, x * 10, y * 10 + 10);
+                if (maze[x][y].getRight() == null)
+                    g.drawLine(x * 10 + 10, y * 10, x * 10 + 10, y * 10 + 10);
+            }
 
-	/**
-	 * Render the maze
-	 * @param g
-	 */
-	public void paint(Graphics g) {
-		int x, y;
+            //if client positions does exist, render the clients into the map
+        if (clientPositions != null) {
 
-		g.clearRect(0, 0, getWidth(), getHeight() );
+            //draw client positions
+            clientPositions.forEach((key, value) -> {
 
-		// Tegner baser p� box-definisjonene ....
+                PositionInMaze pos = (PositionInMaze) value;
 
-		for (x = 1; x < (dim - 1); ++x)
-			for (y = 1; y < (dim - 1); ++y) {
-				if (maze[x][y].getUp() == null)
-					g.drawLine(x * 10, y * 10, x * 10 + 10, y * 10);
-				if (maze[x][y].getDown() == null)
-					g.drawLine(x * 10, y * 10 + 10, x * 10 + 10, y * 10 + 10);
-				if (maze[x][y].getLeft() == null)
-					g.drawLine(x * 10, y * 10, x * 10, y * 10 + 10);
-				if (maze[x][y].getRight() == null)
-					g.drawLine(x * 10 + 10, y * 10, x * 10 + 10, y * 10 + 10);
-			}
+                g.drawOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
 
-			if(clientPositions != null) {
+                //render client colors if possible
+                if (clientColors.containsKey(key)) {
+                    g.setColor((Color) clientColors.get(key));
+                    g.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
+                }
+            });
+        }
+    }
 
-			//draw client positions
-				clientPositions.forEach((key, value) -> {
+    /**
+     * class used for creating n clients using threads. One of these clients (which one doesn't matter)
+     * will be the mapdrawer, responsible for periodically rendering the map
+     */
+    private class CreateClient extends Thread {
 
-					PositionInMaze pos = (PositionInMaze) value;
+        CreateClient() {}
 
-					g.drawOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
+        public void run() {
 
-					//render client colors if available
-					if(clientColors.containsKey(key)) {
-						g.setColor((Color) clientColors.get(key));
-						g.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
-					}
-				});
-			}
-	}
+            try {
+                VirtualUser user = new VirtualUser(maze, serverInterface);
 
-	/**
-	 * class used for creating n clients using threads
-	 */
-	private class CreateClient extends Thread {
+                //assign a random mapdrawerclient
+                if (mapDrawingClientId == null) {
+                    mapDrawingClientId = user.getClientId();
+                }
+                user.sendClientColor();
 
-		CreateClient() {}
+                //keep sending updated positions to server
+                while (true) {
+                    user.sendClientPosition();
 
-		public void run() {
+                    //if the user is the mapdrawerclient, copy the newest clientpositions to Maze class, and repaint
+                    //the map
+                    if (user.getClientId().equals(mapDrawingClientId)) {
+                        clientPositions = user.getListOfAllPosition();
+                        repaint();
+                    }
 
-			try {
-				VirtualUser user = new VirtualUser(maze, serverInterface);
+                    //timeout so clients do not move too quickly
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-				while (true) {
-					user.sendClientPosition();
-					user.sendClientColor();
+    /**
+     * Receives client color properties. Periodically signals the server to send stored client positions to all clients
+     */
+    private class RequestMapUpdate extends Thread {
+        public void run() {
+            try {
+                clientColors = serverInterface.requestClientColors();
 
-					if(user.getClientId() == 0) {
-						clientPositions = user.getListOfAllPosition();
-						repaint();
-					}
-
-					try {
-						sleep(200);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private class RequestMapUpdate extends Thread {
-		public void run() {
-			try {
-				while(true) {
-					sleep(100);
-					serverInterface.sendAllClientPositions();
-					clientColors = serverInterface.requestClientColors();
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+                while (true) {
+                    sleep(100);
+                    serverInterface.sendAllClientPositions();
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
