@@ -1,7 +1,11 @@
 package mazeoblig;
 
+/**
+ * Class provided at assignment startup. No changes were made here
+ */
+
 /************************************************************************
- * Denne koden skal ikke røres
+ * Denne koden skal ikke rï¿½res
  ***********************************************************************/
 
 /**
@@ -27,9 +31,9 @@ public class BoxMaze extends UnicastRemoteObject implements BoxMazeInterface
     protected Box boxmaze[][];
     private int size = 50;
     /**
-     * Konstruktør
-     * Randomiserer opp en tilfeldig labyrint på 20 x 20 bokser hvor veggene
-     * i mellom boksen er "fjernet slik at man får en labyint.
+     * Konstruktï¿½r
+     * Randomiserer opp en tilfeldig labyrint pï¿½ 20 x 20 bokser hvor veggene
+     * i mellom boksen er "fjernet slik at man fï¿½r en labyint.
      */
     public BoxMaze() throws RemoteException {
         init(size);
@@ -41,9 +45,9 @@ public class BoxMaze extends UnicastRemoteObject implements BoxMazeInterface
     }
     /**
      * Genererer labyrinten. Koden er i all vesentlig grad hentet fra en enkel
-     * algoritme som er publisert på http://en.wikipedia.org/wiki/Image:Maze.png
+     * algoritme som er publisert pï¿½ http://en.wikipedia.org/wiki/Image:Maze.png
      *
-     * Algoritmen er skrevet om til å håndtere boksene
+     * Algoritmen er skrevet om til ï¿½ hï¿½ndtere boksene
      */
     private void init (int size) {
         int x, y, n, d;

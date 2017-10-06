@@ -5,6 +5,7 @@ import mazeoblig.ServerInterface;
 
 import java.awt.*;
 import java.rmi.RemoteException;
+import java.rmi.UnmarshalException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Random;
@@ -299,7 +300,6 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 
 		try {
 			serverInterface.sendPosition(clientId, itinerary[totalPositionsMoved]);
-
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}

@@ -1,5 +1,9 @@
 package mazeoblig;
 
+/**
+ *Interface provided at assignment startup. No changes were made here
+ */
+
 import java.rmi.*;
 
 /**
@@ -15,5 +19,5 @@ import java.rmi.*;
  * @version 1.0
  */
 public interface BoxMazeInterface extends Remote {
-    public Box [][] getMaze() throws RemoteException;
+    Box [][] getMaze() throws RemoteException;
 }

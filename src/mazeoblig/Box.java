@@ -1,19 +1,24 @@
 package mazeoblig;
+
+/**
+ * Class provided at assignment startup. No changes were made here
+ */
+
 /************************************************************************
- * Denne koden skal ikke røres
+ * Denne koden skal ikke rï¿½res
  ***********************************************************************/
 import java.util.Vector;
 /**
  * <p>Title: Box</p>
  *
  * <p>Description: Representerer et kvadrat/boks i en labyrint
- *    som består av en rekke bokser som står ved siden av hverandre.</p>
+ *    som bestï¿½r av en rekke bokser som stï¿½r ved siden av hverandre.</p>
  *
  * <p>Copyright: Copyright (c) 2006</p>
  *
  * <p>Company: </p>
  *
- * @author Asbjørn D.
+ * @author Asbjï¿½rn D.
  * @version 1.0
  */
 import java.io.Serializable;
@@ -27,18 +32,18 @@ public class Box implements Serializable {
     private int Value = 0;
 
     /**
-     * Konstruktør - lager en selvstendig boks og angir en verdi som
-     * temporært brukes til å bestemme hvilke "vegger" som skal være
+     * Konstruktï¿½r - lager en selvstendig boks og angir en verdi som
+     * temporï¿½rt brukes til ï¿½ bestemme hvilke "vegger" som skal vï¿½re
      * i boksen.
-     * @param value int Temporær verdi
+     * @param value int Temporï¿½r verdi
      */
     public Box(int value) {
         Value = value;
     }
 
     /**
-     * Konstruktør, på lik linje med Box(int value), men som til forskjell
-     * også angir hvilke andre bokser som grenser til denne boksen
+     * Konstruktï¿½r, pï¿½ lik linje med Box(int value), men som til forskjell
+     * ogsï¿½ angir hvilke andre bokser som grenser til denne boksen
      * @param up Box
      * @param down Box
      * @param left Box
@@ -72,13 +77,13 @@ public class Box implements Serializable {
      */
     public Box getLeft() { return Left; }
     /**
-     * Henter boksen til høyre for denne boks.
-     * Hvis det ikke finnes en boks til høyre, returneres null.
+     * Henter boksen til hï¿½yre for denne boks.
+     * Hvis det ikke finnes en boks til hï¿½yre, returneres null.
      * @return Box
      */
     public Box getRight() { return Right; }
     /**
-     * Henter ut den temporære verdien som brukes for å bestemme sammensetningen
+     * Henter ut den temporï¿½re verdien som brukes for ï¿½ bestemme sammensetningen
      * av vegger.
      * @return int
      */
@@ -100,12 +105,12 @@ public class Box implements Serializable {
      */
     public void setLeft(Box value) { Left = value; }
     /**
-     * Setter boksen til høyre for denne boks
+     * Setter boksen til hï¿½yre for denne boks
      * @param value Box
      */
     public void setRight(Box value) { Right = value; }
     /**
-     * Setter den temporære verdien som brukes for å bestemme sammensetningen
+     * Setter den temporï¿½re verdien som brukes for ï¿½ bestemme sammensetningen
      * av vegger.
      * @param value int
      */
