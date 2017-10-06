@@ -1,6 +1,6 @@
 package mazeoblig;
 
-import simulator.CallbackInterface;
+import simulator.ClientCallbackInterface;
 import simulator.PositionInMaze;
 
 import java.rmi.RemoteException;
@@ -10,14 +10,14 @@ import java.util.HashMap;
 /**
  * Class responsible for client-server-client communication
  */
-public class TalkToServer extends UnicastRemoteObject implements TalkToServerInterface {
+public class Server extends UnicastRemoteObject implements ServerInterface {
 
     private int clientId = 0;
     private HashMap<Integer, PositionInMaze> clientPositions = new HashMap<>();
-    private HashMap<Integer, CallbackInterface> clientList = new HashMap<>();
+    private HashMap<Integer, ClientCallbackInterface> clientList = new HashMap<>();
 
 
-    protected TalkToServer() throws RemoteException {
+    protected Server() throws RemoteException {
     }
 
     /**
@@ -34,7 +34,7 @@ public class TalkToServer extends UnicastRemoteObject implements TalkToServerInt
     }
 
     @Override
-    public Integer setClientId(CallbackInterface cb) throws RemoteException {
+    public Integer setClientId(ClientCallbackInterface cb) throws RemoteException {
         synchronized (clientList) {
             int id = clientId++;
             clientList.put(id, cb);

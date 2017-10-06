@@ -1,8 +1,7 @@
 package simulator;
 
 import mazeoblig.Box;
-import mazeoblig.RMIServer;
-import mazeoblig.TalkToServerInterface;
+import mazeoblig.ServerInterface;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -26,7 +25,7 @@ import java.util.Arrays;
  * @author asd
  *
  */
-public class VirtualUser extends UnicastRemoteObject implements CallbackInterface {
+public class VirtualUser extends UnicastRemoteObject implements ClientCallbackInterface {
 
 	/**
 	 * BugFix: 07.10.2013 - Fikset problem med at VirtualUser i enkelt tilfeller posisjonerer seg selv 
@@ -45,7 +44,7 @@ public class VirtualUser extends UnicastRemoteObject implements CallbackInterfac
 	private PositionInMaze [] firstIteration;
 	private PositionInMaze [] nextIteration;
 	private int clientId;
-	private TalkToServerInterface serverInterface;
+	private ServerInterface serverInterface;
 	private PositionInMaze[] itinerary;
 	private int totalPositionsMoved = 0;
 	private HashMap<Integer, PositionInMaze> listOfAllPosition;
@@ -54,7 +53,7 @@ public class VirtualUser extends UnicastRemoteObject implements CallbackInterfac
 	 * Konstrukt�r
 	 * @param maze
 	 */
-	public VirtualUser(Box[][] maze, TalkToServerInterface serverInterface) throws RemoteException {
+	public VirtualUser(Box[][] maze, ServerInterface serverInterface) throws RemoteException {
 		super();
 		this.maze = maze;
 		this.serverInterface = serverInterface;

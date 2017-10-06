@@ -47,7 +47,7 @@ public class Maze extends Applet {
 	private String server_hostname;
 	private int server_portnumber;
 
-	private TalkToServerInterface talkToServerInterface;
+	private ServerInterface serverInterface;
 	private HashMap clientPositions = null;
 	private final int CLIENTS_TO_CREATE = 15;
 
@@ -77,8 +77,8 @@ public class Maze extends Applet {
 			bm = (BoxMazeInterface) r.lookup(RMIServer.MazeName);
 			maze = bm.getMaze();
 
-			//Henter referansen til TalkToServerInterface metoder
-			talkToServerInterface = (TalkToServerInterface) r.lookup(RMIServer.talkToServerIdString);
+			//Henter referansen til ServerInterface metoder
+			serverInterface = (ServerInterface) r.lookup(RMIServer.talkToServerIdString);
 
 		} catch (RemoteException e) {
 			System.err.println("Remote Exception: " + e.getMessage());
@@ -175,7 +175,7 @@ public class Maze extends Applet {
 		public void run() {
 
 			try {
-				VirtualUser user = new VirtualUser(maze,talkToServerInterface);
+				VirtualUser user = new VirtualUser(maze, serverInterface);
 
 				while (true) {
 					user.nextPosition();
@@ -202,7 +202,7 @@ public class Maze extends Applet {
 			try {
 				while(true) {
 					sleep(100);
-					talkToServerInterface.sendAllClientPositions();
+					serverInterface.sendAllClientPositions();
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
