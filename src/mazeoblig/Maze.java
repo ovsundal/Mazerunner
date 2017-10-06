@@ -20,7 +20,6 @@ import java.applet.*;
  * @author not attributable
  * @version 1.0
  */
-import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 import java.util.HashMap;
@@ -45,7 +44,7 @@ public class Maze extends Applet {
     private ServerInterface serverInterface;
     private HashMap<Integer, InformationObject> clientPositions = null;
     private HashMap clientColors = null;
-    private final int CLIENTS_TO_CREATE = 20;
+    private final int CLIENTS_TO_CREATE = 50;
     private Integer mapDrawingClientId;
     long timeStart = System.currentTimeMillis();
 
@@ -55,7 +54,8 @@ public class Maze extends Applet {
     Dimension dimension;
 
     /**
-     * Establish server and registry connection. Retrieve all remote objects from RMI server
+     * Establish server and registry connection (will only work if server and client is run from the same computer)
+     * Retrieve all remote objects from RMI server
      */
     public void init() {
 
@@ -64,11 +64,7 @@ public class Maze extends Applet {
         offscreen = createImage(dimension.width, dimension.height);
         bufferGraphics = offscreen.getGraphics();
 
-        /*
-		 ** Kobler opp mot RMIServer, under forutsetning av at disse
-		 ** kj�rer p� samme maskin. Hvis ikke m� oppkoblingen
-		 ** skrives om slik at dette passer med virkeligheten.
-		 */
+        //establish connection
         if (server_hostname == null)
             server_hostname = RMIServer.getHostName();
         if (server_portnumber == 0)
@@ -78,26 +74,17 @@ public class Maze extends Applet {
                     getRegistry(server_hostname,
                             server_portnumber);
 
-			/*
-			 ** Henter inn referansen til Labyrinten (ROR)
-			 */
+			//get maze reference
             bm = (BoxMazeInterface) r.lookup(RMIServer.MazeName);
             maze = bm.getMaze();
 
-            //Henter referansen til ServerInterface metoder
-            serverInterface = (ServerInterface) r.lookup(RMIServer.talkToServerIdString);
+            //get reference to server methods
+            serverInterface = (ServerInterface) r.lookup(RMIServer.serverIdString);
 
         } catch (RemoteException e) {
             System.err.println("Remote Exception: " + e.getMessage());
             System.exit(0);
         } catch (NotBoundException f) {
-			/*
-			 ** En exception her er en indikasjon p� at man ved oppslag (lookup())
-			 ** ikke finner det objektet som man s�ker.
-			 ** �rsaken til at dette skjer kan v�re mange, men v�r oppmerksom p�
-			 ** at hvis hostname ikke er OK (RMIServer gir da feilmelding under
-			 ** oppstart) kan v�re en �rsak.
-			 */
             System.err.println("Not Bound Exception: " + f.getMessage());
             System.exit(0);
         }
@@ -121,7 +108,7 @@ public class Maze extends Applet {
     }
 
     /**
-     * Render the maze and registered clients
+     * Render the maze, statistics and registered clients
      */
     public void paint(Graphics g) {
         int x, y;
@@ -161,8 +148,14 @@ public class Maze extends Applet {
             bufferGraphics.drawString("AVG RECEIVED / SECOND: " +totalReceivedMessagesByServer / timeDeltaInSeconds,
                     0, 375);
 
-            bufferGraphics.drawString("AVG SENT / SECOND: " +totalSentMessagesByServer / timeDeltaInSeconds,
-                    0, 390);
+            bufferGraphics.drawString("AVG RECEIVED PER CLIENT / SECOND: " +
+                            (totalReceivedMessagesByServer / timeDeltaInSeconds) / CLIENTS_TO_CREATE,0, 390);
+
+            bufferGraphics.drawString("AVG SENT / SECOND: " + totalSentMessagesByServer / timeDeltaInSeconds,
+                    0, 415);
+
+            bufferGraphics.drawString("AVG SENT PER CLIENT / SECOND: " +
+                            (totalSentMessagesByServer / timeDeltaInSeconds) / CLIENTS_TO_CREATE,0, 430);
 
             //draw client positions
             clientPositions.forEach((key, value) -> {
@@ -174,6 +167,7 @@ public class Maze extends Applet {
                 bufferGraphics.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
             });
             //paint the buffered image onto applet graphics
+            g.setColor(Color.BLACK);
             g.drawImage(offscreen,0,0,this);
         }
     }

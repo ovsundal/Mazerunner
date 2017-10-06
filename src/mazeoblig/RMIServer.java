@@ -37,7 +37,7 @@ public class RMIServer
    * @todo: Her legger man til andre objekter som skal v�re p� server
   */
     private static ServerMethods talkToServerMethods;
-    public static String talkToServerIdString = "ServerMethods";
+    public static String serverIdString = "ServerMethods";
 
   public RMIServer() throws RemoteException, MalformedURLException,
                              NotBoundException, AlreadyBoundException {
@@ -62,7 +62,7 @@ public class RMIServer
       System.out.println( "Remote talkToServerMethods object created" );
 
       String infoToServerString = "//" + HOST_NAME + ":" + PORT + "/" +
-              talkToServerIdString;
+              serverIdString;
 
       Naming.rebind( infoToServerString, talkToServerMethods);
 
