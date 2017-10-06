@@ -289,7 +289,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		//if client has traversed the entire maze, reset travel path
 		if(totalPositionsMoved >= itinerary.length ) {
 			totalPositionsMoved = 0;
-			init();
+//			init();
 		}
 	}
 

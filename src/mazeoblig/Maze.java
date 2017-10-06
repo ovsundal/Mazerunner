@@ -20,6 +20,7 @@ import java.applet.*;
  * @author not attributable
  * @version 1.0
  */
+import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 import java.util.HashMap;
@@ -48,12 +49,21 @@ public class Maze extends Applet {
     private Integer mapDrawingClientId;
     long timeStart = System.currentTimeMillis();
 
+    //used for double buffering. Method from http://www.realapplets.com/tutorial/doublebuffering.html
+    Graphics bufferGraphics;
+    Image offscreen;
+    Dimension dimension;
 
     /**
      * Establish server and registry connection. Retrieve all remote objects from RMI server
      */
     public void init() {
-        int size = dim;
+
+        //used for double buffering
+        dimension = getSize();
+        offscreen = createImage(dimension.width, dimension.height);
+        bufferGraphics = offscreen.getGraphics();
+
         /*
 		 ** Kobler opp mot RMIServer, under forutsetning av at disse
 		 ** kj�rer p� samme maskin. Hvis ikke m� oppkoblingen
@@ -117,40 +127,41 @@ public class Maze extends Applet {
         int x, y;
 
         //clear the previous map
-        g.clearRect(0, 0, getWidth(), getHeight());
+        bufferGraphics.clearRect(0, 0, dimension.width, dimension.height);
 
         // Draw the map
         for (x = 1; x < (dim - 1); ++x)
             for (y = 1; y < (dim - 1); ++y) {
                 if (maze[x][y].getUp() == null)
-                    g.drawLine(x * 10, y * 10, x * 10 + 10, y * 10);
+                    bufferGraphics.drawLine(x * 10, y * 10, x * 10 + 10, y * 10);
                 if (maze[x][y].getDown() == null)
-                    g.drawLine(x * 10, y * 10 + 10, x * 10 + 10, y * 10 + 10);
+                    bufferGraphics.drawLine(x * 10, y * 10 + 10, x * 10 + 10, y * 10 + 10);
                 if (maze[x][y].getLeft() == null)
-                    g.drawLine(x * 10, y * 10, x * 10, y * 10 + 10);
+                    bufferGraphics.drawLine(x * 10, y * 10, x * 10, y * 10 + 10);
                 if (maze[x][y].getRight() == null)
-                    g.drawLine(x * 10 + 10, y * 10, x * 10 + 10, y * 10 + 10);
+                    bufferGraphics.drawLine(x * 10 + 10, y * 10, x * 10 + 10, y * 10 + 10);
             }
 
-            //if client positions does exist, render the clients into the map
+            //if client positions does exist, render the clients into the buffered map
         if (clientPositions != null) {
 
             int totalReceivedMessagesByServer = clientPositions.get(mapDrawingClientId).getTotalServerMessagesReceived();
             int totalSentMessagesByServer = clientPositions.get(mapDrawingClientId).getTotalClientMessagesSent();
+
             //calculate messages/second
             long timeDeltaInSeconds =  (System.currentTimeMillis() - timeStart) / 1000;
 
-            //add server statistics to applet
-            g.drawString("Total messages server has received: " + totalReceivedMessagesByServer, 0, 330);
+            //add server statistics
+            bufferGraphics.drawString("Total messages server has received: " + totalReceivedMessagesByServer, 0, 330);
 
-            g.drawString("Total messages sent from server: " + totalSentMessagesByServer, 0, 345);
+            bufferGraphics.drawString("Total messages sent from server: " + totalSentMessagesByServer, 0, 345);
 
-            g.drawString("---------------------", 0, 360);
+            bufferGraphics.drawString("---------------------", 0, 360);
 
-            g.drawString("RECEIVED / SECOND: " +totalReceivedMessagesByServer / timeDeltaInSeconds,
+            bufferGraphics.drawString("AVG RECEIVED / SECOND: " +totalReceivedMessagesByServer / timeDeltaInSeconds,
                     0, 375);
 
-            g.drawString("SENT / SECOND: " +totalSentMessagesByServer / timeDeltaInSeconds,
+            bufferGraphics.drawString("AVG SENT / SECOND: " +totalSentMessagesByServer / timeDeltaInSeconds,
                     0, 390);
 
             //draw client positions
@@ -159,9 +170,11 @@ public class Maze extends Applet {
                 PositionInMaze pos = value.getPosition();
                 Color color = value.getColor();
 
-                    g.setColor(color);
-                    g.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
+                bufferGraphics.setColor(color);
+                bufferGraphics.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
             });
+            //paint the buffered image onto applet graphics
+            g.drawImage(offscreen,0,0,this);
         }
     }
 
