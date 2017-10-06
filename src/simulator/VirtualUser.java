@@ -1,11 +1,11 @@
 package simulator;
 
 import mazeoblig.Box;
+import mazeoblig.InformationObject;
 import mazeoblig.ServerInterface;
 
 import java.awt.*;
 import java.rmi.RemoteException;
-import java.rmi.UnmarshalException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Random;
@@ -50,7 +50,9 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	private PositionInMaze[] itinerary;
 	private int totalPositionsMoved = 0;
 	private HashMap<Integer, PositionInMaze> listOfAllPosition;
-	private Color color;
+//	private Color color;
+	private InformationObject informationObject = null;
+	private HashMap<Integer, InformationObject> infoFromAllClients = null;
 
 	/**
 	 * Konstrukt�r
@@ -61,8 +63,14 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		this.maze = maze;
 		this.serverInterface = serverInterface;
 		dim = maze[0].length;
-		this.color = new Color(new Random().nextInt(0xFFFFFF));
+//		this.color = new Color(new Random().nextInt(0xFFFFFF));
+		Color randomColor =new Color(new Random().nextInt(0xFFFFFF));
+
+		//create information object with callbackinterface and random color
+		this.informationObject = new InformationObject(this, randomColor);
 		init();
+
+
 	}
 	/**
 	 * Initsierer en tilfeldig posisjon i labyrint
@@ -79,8 +87,8 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		try {
 			//if clientId exists, client has finished traversing the maze and this is called during
 			// creation of a new itinerary. No need to change id
-			if(clientId == null) {
-				clientId = serverInterface.setClientId(this);
+			if(informationObject.getClientId() == null) {
+				informationObject.setClientId(serverInterface.setClientId(this));
 			}
 
 		} catch (RemoteException e) {
@@ -253,29 +261,9 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		return result;
 	}
 
-	/**
-	 * Returnerer en PositionInMaze [] som inneholder x- og y-posisjonene som 
-	 * en virituell spiller benytter for � finne veien ut av labyrinten ut fra
-	 * inngangen i labyrinten.
-	 * @return
-	 */
-	public PositionInMaze [] getIterationLoop() {
-		return nextIteration;
-	}
-
-	/**
-	 * Returnerer en PositionInMaze [] som inneholder x- og y-posisjonene som 
-	 * en virituell spiller benytter for � finne veien ut av labyrinten ut fra
-	 * en tilfedlig generert startposisjon i labyrinten.
-	 * @return
-	 */
-	public PositionInMaze [] getFirstIterationLoop() {
-		return firstIteration;
-	}
-
 	@Override
 	public Integer getClientId() throws RemoteException {
-		return clientId;
+		return this.informationObject.getClientId();
 	}
 
 	/**
@@ -288,6 +276,23 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		this.listOfAllPosition = listOfAllPosition;
 	}
 
+	/**
+	 * When client receives an updated information object with info from all clients from server, store it
+	 * @param objectHashMap
+	 * @throws RemoteException
+	 */
+	@Override
+	public void receiveInformationObjectFromServer(HashMap<Integer, InformationObject> objectHashMap) throws RemoteException {
+		setInfoFromAllClients(objectHashMap);
+	}
+
+	/**
+	 * Client receives the information object back from server with updated info
+
+	 * @throws RemoteException
+	 */
+
+
 	public HashMap<Integer, PositionInMaze> getListOfAllPosition() {
 		return listOfAllPosition;
 	}
@@ -296,28 +301,45 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	/**
 	 * Moves the client to next position in itinerary and informs server
 	 */
-	public void sendClientPosition() throws RemoteException {
+	public void sendInfoToServer() throws RemoteException {
 
+		//move to next position in maze and update information object
+		informationObject.setPosition(itinerary[totalPositionsMoved]);
+		totalPositionsMoved++;
+
+		//send information object to server
 		try {
-			serverInterface.sendPosition(clientId, itinerary[totalPositionsMoved]);
+			serverInterface.sendInformationObjectToServer(informationObject);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		totalPositionsMoved++;
-		//client have traversed the entire maze, reset travel path
+
+		//if client has traversed the entire maze, reset travel path
 		if(totalPositionsMoved >= itinerary.length ) {
 			totalPositionsMoved = 0;
 			init();
 		}
 	}
 
-	public void sendClientColor() {
-		try {
-			serverInterface.sendClientColors(clientId, color);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+	public HashMap<Integer, InformationObject> getInfoFromAllClients() {
+		return infoFromAllClients;
 	}
+
+	public void setInfoFromAllClients(HashMap<Integer, InformationObject> infoFromAllClients) {
+		this.infoFromAllClients = infoFromAllClients;
+	}
+
+	public InformationObject getInformationObject() {
+		return informationObject;
+	}
+
+	//	public void sendClientColor() {
+//		try {
+//			serverInterface.sendClientColors(clientId, color);
+//		} catch (RemoteException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 
 }

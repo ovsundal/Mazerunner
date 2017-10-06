@@ -42,7 +42,7 @@ public class Maze extends Applet {
     private String server_hostname;
     private int server_portnumber;
     private ServerInterface serverInterface;
-    private HashMap clientPositions = null;
+    private HashMap<Integer, InformationObject> clientPositions = null;
     private HashMap clientColors = null;
     private final int CLIENTS_TO_CREATE = 20;
     private Integer mapDrawingClientId;
@@ -138,15 +138,13 @@ public class Maze extends Applet {
             //draw client positions
             clientPositions.forEach((key, value) -> {
 
-                PositionInMaze pos = (PositionInMaze) value;
 
-                g.drawOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
+                PositionInMaze pos = value.getPosition();
+                Color color = value.getColor();
 
-                //render client colors if possible
-                if (clientColors.containsKey(key)) {
-                    g.setColor((Color) clientColors.get(key));
+                    g.setColor(color);
                     g.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
-                }
+
             });
         }
     }
@@ -168,16 +166,18 @@ public class Maze extends Applet {
                 if (mapDrawingClientId == null) {
                     mapDrawingClientId = user.getClientId();
                 }
-                user.sendClientColor();
 
                 //keep sending updated positions to server
                 while (true) {
-                    user.sendClientPosition();
 
-                    //if the user is the mapdrawerclient, copy the newest clientpositions to Maze class, and repaint
-                    //the map
+                    user.sendInfoToServer();
+
+
+                    //if the user is the mapdrawerclient, copy all data the client received from server to the Maze
+                    // class, and repaint the map
                     if (user.getClientId().equals(mapDrawingClientId)) {
-                        clientPositions = user.getListOfAllPosition();
+
+                        clientPositions = user.getInfoFromAllClients();
                         repaint();
                     }
 
@@ -200,11 +200,10 @@ public class Maze extends Applet {
     private class RequestMapUpdate extends Thread {
         public void run() {
             try {
-                clientColors = serverInterface.requestClientColors();
 
                 while (true) {
                     sleep(100);
-                    serverInterface.sendAllClientPositions();
+                    serverInterface.receiveInformationObject();
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();
