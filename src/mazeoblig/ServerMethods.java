@@ -69,6 +69,13 @@ public class ServerMethods extends UnicastRemoteObject implements ServerInterfac
 
     @Override
     public void sendClientColors(int id, Color color) throws RemoteException {
-        clientColors.put(id, color);
+        synchronized (clientColors) {
+            clientColors.put(id, color);
+        }
+    }
+
+    @Override
+    public HashMap requestClientColors() throws RemoteException {
+        return clientColors;
     }
 }

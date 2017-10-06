@@ -13,4 +13,5 @@ public interface ServerInterface extends Remote{
     Integer setClientId(ClientCallbackInterface cb) throws RemoteException;
     void sendAllClientPositions() throws RemoteException;
     void sendClientColors(int id, Color color) throws RemoteException;
+    HashMap requestClientColors() throws RemoteException;
 }

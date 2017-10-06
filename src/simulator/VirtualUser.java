@@ -3,6 +3,7 @@ package simulator;
 import mazeoblig.Box;
 import mazeoblig.ServerInterface;
 
+import java.awt.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	private PositionInMaze[] itinerary;
 	private int totalPositionsMoved = 0;
 	private HashMap<Integer, PositionInMaze> listOfAllPosition;
+	private Color color;
 
 	/**
 	 * Konstrukt�r
@@ -58,6 +60,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		this.maze = maze;
 		this.serverInterface = serverInterface;
 		dim = maze[0].length;
+		this.color = new Color(new Random().nextInt(0xFFFFFF));
 		init();
 	}
 	/**
@@ -288,7 +291,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	/**
 	 * Moves the client to next position in itinerary and informs server
 	 */
-	public void nextPosition() {
+	public void sendClientPosition() {
 
 		try {
 			serverInterface.sendPosition(clientId, itinerary[totalPositionsMoved]);
@@ -297,8 +300,19 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 			e.printStackTrace();
 		}
 		totalPositionsMoved++;
+		//client have traversed the entire path, remove from game
 		if(totalPositionsMoved >= itinerary.length ) {
-			System.exit(1);
+//			System.exit(1);
 		}
 	}
+
+	public void sendClientColor() {
+		try {
+			serverInterface.sendClientColors(clientId, color);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+
 }

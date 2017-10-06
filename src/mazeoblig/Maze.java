@@ -49,6 +49,7 @@ public class Maze extends Applet {
 
 	private ServerInterface serverInterface;
 	private HashMap clientPositions = null;
+	private HashMap clientColors = null;
 	private final int CLIENTS_TO_CREATE = 15;
 
 
@@ -156,11 +157,18 @@ public class Maze extends Applet {
 
 			if(clientPositions != null) {
 
+			//draw client positions
 				clientPositions.forEach((key, value) -> {
 
 					PositionInMaze pos = (PositionInMaze) value;
 
 					g.drawOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
+
+					//render client colors if available
+					if(clientColors.containsKey(key)) {
+						g.setColor((Color) clientColors.get(key));
+						g.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
+					}
 				});
 			}
 	}
@@ -178,7 +186,8 @@ public class Maze extends Applet {
 				VirtualUser user = new VirtualUser(maze, serverInterface);
 
 				while (true) {
-					user.nextPosition();
+					user.sendClientPosition();
+					user.sendClientColor();
 
 					if(user.getClientId() == 0) {
 						clientPositions = user.getListOfAllPosition();
@@ -203,6 +212,7 @@ public class Maze extends Applet {
 				while(true) {
 					sleep(100);
 					serverInterface.sendAllClientPositions();
+					clientColors = serverInterface.requestClientColors();
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
