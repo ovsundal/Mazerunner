@@ -3,6 +3,7 @@ package mazeoblig;
 import simulator.ClientCallbackInterface;
 import simulator.PositionInMaze;
 
+import java.awt.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -10,15 +11,19 @@ import java.util.HashMap;
 /**
  * Class responsible for client-server-client communication
  */
-public class Server extends UnicastRemoteObject implements ServerInterface {
+public class ServerMethods extends UnicastRemoteObject implements ServerInterface {
 
     private int clientId = 0;
     private HashMap<Integer, PositionInMaze> clientPositions = new HashMap<>();
     private HashMap<Integer, ClientCallbackInterface> clientList = new HashMap<>();
+    private HashMap<Integer, Color> clientColors = new HashMap<Integer, Color>();
 
 
-    protected Server() throws RemoteException {
+    protected ServerMethods() throws RemoteException {
     }
+
+
+
 
     /**
      * Method collects new client positions and appends them to list
@@ -60,5 +65,10 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
                 });
             }
         }
+    }
+
+    @Override
+    public void sendClientColors(int id, Color color) throws RemoteException {
+        clientColors.put(id, color);
     }
 }

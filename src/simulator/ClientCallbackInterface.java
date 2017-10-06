@@ -1,5 +1,6 @@
 package simulator;
 
+import java.awt.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
