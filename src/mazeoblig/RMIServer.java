@@ -36,7 +36,7 @@ public class RMIServer
   /**
    * @todo: Her legger man til andre objekter som skal v�re p� server
   */
-    private static ServerMethods talkToServerMethods;
+    private static ServerMethods serverMethods;
     public static String serverIdString = "ServerMethods";
 
   public RMIServer() throws RemoteException, MalformedURLException,
@@ -58,13 +58,13 @@ public class RMIServer
     /**
     * @todo: Og her legges andre objekter som ogs� skal v�re p� server inn ....
     */
-      talkToServerMethods = new ServerMethods();
-      System.out.println( "Remote talkToServerMethods object created" );
+      serverMethods = new ServerMethods();
+      System.out.println( "Remote serverMethods object created" );
 
       String infoToServerString = "//" + HOST_NAME + ":" + PORT + "/" +
               serverIdString;
 
-      Naming.rebind( infoToServerString, talkToServerMethods);
+      Naming.rebind( infoToServerString, serverMethods);
 
     System.out.println( "Bindings Finished, waiting for client requests." );
   }

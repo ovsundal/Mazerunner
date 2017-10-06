@@ -5,8 +5,12 @@ import simulator.PositionInMaze;
 import java.awt.*;
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.util.HashMap;
 
+/**
+ * All information client needs to pass to server (and server needs to pass to client) is stored within this object
+ * It is updated with relevant client info, then sent to server. Server retrieves the data, add its own data and
+ * sends back to each client a collection of updated informationObjects from all clients
+ */
 public class InformationObject implements Serializable {
 
     //info provided by client
@@ -16,10 +20,8 @@ public class InformationObject implements Serializable {
     private ClientCallbackInterface clientCallbackInterface;
 
     //info provided by server
-    private int timeSinceServerStarted;
     private int totalServerMessagesReceived;
     private int totalClientMessagesSent;
-    private HashMap<Integer, InformationObject> listOfAllClientPositions;
 
     public InformationObject(ClientCallbackInterface cb, Color color) throws RemoteException {
         super();
@@ -36,14 +38,6 @@ public class InformationObject implements Serializable {
 
     public void setPosition(PositionInMaze position) {
         this.position = position;
-    }
-
-    public int getTimeSinceServerStarted() {
-        return timeSinceServerStarted;
-    }
-
-    public void setTimeSinceServerStarted(int timeSinceServerStarted) {
-        this.timeSinceServerStarted = timeSinceServerStarted;
     }
 
     public int getTotalServerMessagesReceived() {
@@ -74,7 +68,4 @@ public class InformationObject implements Serializable {
         return clientCallbackInterface;
     }
 
-    public void setClientCallbackInterface(ClientCallbackInterface clientCallbackInterface) {
-        this.clientCallbackInterface = clientCallbackInterface;
-    }
 }

@@ -9,7 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 
 /**
- * Class responsible for client-server-client communication
+ * Class with methods responsible for client-server-client communication
  */
 public class ServerMethods extends UnicastRemoteObject implements ServerInterface {
 

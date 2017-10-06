@@ -44,7 +44,7 @@ public class Maze extends Applet {
     private ServerInterface serverInterface;
     private HashMap<Integer, InformationObject> clientPositions = null;
     private HashMap clientColors = null;
-    private final int CLIENTS_TO_CREATE = 50;
+    private final int CLIENTS_TO_CREATE = 75;
     private Integer mapDrawingClientId;
     long timeStart = System.currentTimeMillis();
 
