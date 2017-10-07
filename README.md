@@ -1,4 +1,4 @@
-# NewMazeOblig
+# Mazerunner
 
 The purpose of this project is to have n different clients traversing through a unique maze, solving it in the end. When it is solved the client moves to starting possition and restarts the maze. The clients always know each others position, and updates an applet continuously. This is done having clients connecting to a server and passing data. The server then collects all this data and periodically sends the data back to each registered client. Project is done using java-rmi technology.
 
