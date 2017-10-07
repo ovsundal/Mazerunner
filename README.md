@@ -13,3 +13,4 @@ Project is part of a university course in distributed systems, fall 2017. Method
 ## Known problems
 
 * To reduce workload, only one (randomly assigned) client draws the maze. If this client for some reason disconnects, maze rendering will stop   
+* Server and clients must be run from the same computer to work
