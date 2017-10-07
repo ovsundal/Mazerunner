@@ -27,10 +27,7 @@ import java.util.HashMap;
 import static java.lang.Thread.sleep;
 
 /**
- * Tegner opp maze i en applet, basert p� definisjon som man finner p� RMIServer
- * RMIServer p� sin side  henter st�rrelsen fra definisjonen i Maze
- *
- * @author asd
+ * Class responsible for drawing the maze and populating it with clients
  */
 @SuppressWarnings("serial")
 public class Maze extends Applet {
@@ -43,18 +40,18 @@ public class Maze extends Applet {
     private int server_portnumber;
     private ServerInterface serverInterface;
     private HashMap<Integer, InformationObject> clientPositions = null;
-    private final int CLIENTS_TO_CREATE = 2;
+    private final int CLIENTS_TO_CREATE = 50;
     private Integer mapDrawingClientId;
     long timeStart = System.currentTimeMillis();
 
-    //used for double buffering. Method from http://www.realapplets.com/tutorial/doublebuffering.html
-    Graphics bufferGraphics;
-    Image offscreen;
-    Dimension dimension;
+    //used for double buffering inside paint method (From http://www.realapplets.com/tutorial/doublebuffering.html)
+    private Graphics bufferGraphics;
+    private Image offscreen;
+    private Dimension dimension;
 
     /**
      * Establish server and registry connection (will only work if server and client is run from the same computer)
-     * Retrieve all remote objects from RMI server
+     * Retrieve all remote objects from RMI server. Method supplied at project start, modified by author
      */
     public void init() {
 
@@ -107,7 +104,7 @@ public class Maze extends Applet {
     }
 
     /**
-     * Render the maze, statistics and registered clients
+     * Render the maze, statistics and registered clients. Use doublebuffer to reduce applet render flimmering
      */
     public void paint(Graphics g) {
         int x, y;
@@ -136,13 +133,10 @@ public class Maze extends Applet {
             long timeDeltaInSeconds;
 
             //calculate messages/second.
-
                 timeDeltaInSeconds =  (System.currentTimeMillis() - timeStart) / 1000;
 
-
-
-
             //add server statistics
+            bufferGraphics.drawString("Active clients: " + clientPositions.size(), 0, 315);
 
             bufferGraphics.drawString("Total messages server has received: " + totalReceivedMessagesByServer, 0, 330);
 
@@ -190,6 +184,7 @@ public class Maze extends Applet {
                 bufferGraphics.setColor(color);
                 bufferGraphics.fillOval(pos.getXpos() * 10, pos.getYpos() * 10, 10, 10);
             });
+
             //paint the buffered image onto applet graphics
             g.setColor(Color.BLACK);
             g.drawImage(offscreen,0,0,this);
@@ -241,7 +236,7 @@ public class Maze extends Applet {
     }
 
     /**
-     * Receives client color properties. Periodically signals the server to send stored client positions to all clients
+     * class periodically signals the server to send stored client positions back to all clients using callbacks
      */
     private class RequestMapUpdate extends Thread {
         public void run() {
@@ -251,9 +246,7 @@ public class Maze extends Applet {
                     sleep(100);
                     serverInterface.sendUpdatedInformationObjectFromServerToClient();
                 }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (RemoteException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

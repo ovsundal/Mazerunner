@@ -11,27 +11,15 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Stack;
 import java.util.Arrays;
+
 /**
- * Instansen av denne klassen tilbyr i praksis tre metoder til programmereren. Disse er:
- * <p>
- * a. Konstrukt�ren (som tar imot en Maze som parameter<br>
- * b. getFirstIterationLoop() som returnerer en rekke med posisjoner i Maze som finner veien<br>
- *    ut av Maze og reposisjonerer "spilleren" ved starten av Maze basert p� en tilfeldig <br>
- *    posisjonering av spilleren i Maze<br>
- * c. getIterationLoop() som returnerer en rekke med posisjoner i Maze som finner veien<br>
- *    ut av Maze (fra inngangen) og reposisjonerer "spileren" ved starten av Maze p� nytt<br>
- * <p>
- * Ideen er at programmereren skal kunne benytte disse ferdig definerte posisjonene til � simulere
- * hvordan en bruker forflytter seg i en labyrint.
- *     
- * @author asd
- *
+ * Procedure for solving the maze was provided at project start. Methods dealing with client communication
+ * made by author
  */
 public class VirtualUser extends UnicastRemoteObject implements ClientCallbackInterface {
 
 	/**
-	 * BugFix: 07.10.2013 - Fikset problem med at VirtualUser i enkelt tilfeller posisjonerer seg selv 
-	 *                      utenfor selve labyrinten
+	 * BugFix: 07.10.2013 - Fix a problem with VirtualUser sometimes positions itself outside of the maze
 	 * 
 	 */
 	private Box[][] maze;
@@ -52,8 +40,10 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	private HashMap<Integer, InformationObject> infoFromAllClients = null;
 
 	/**
-	 * Konstrukt�r
+	 * Below method were provided at project start
 	 * @param maze
+	 * @param serverInterface
+	 * @throws RemoteException
 	 */
 	public VirtualUser(Box[][] maze, ServerInterface serverInterface) throws RemoteException {
 		super();
@@ -67,7 +57,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		init();
 	}
 	/**
-	 * Initsierer en tilfeldig posisjon i labyrint
+	 * Initialize a random position inside the maze. Provided at project start
 	 */
 	private void init() {
 		/*
@@ -99,7 +89,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 	
 	/**
-	 * L�ser maze ut fra en tilfeldig posisjon i maze
+	 * Solve the maze from a random starting position. Provided at project start
 	 */
 	private void solveMaze() {
 		found = false;
@@ -110,9 +100,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Selve backtracking-algoritmen som brukes for � finne l�sningen
-	 * @param b Box
-	 * @param from Box
+	 * Backtrack-algorithm for solving the maze. Provided at project start
 	 */
 	private void backtrack(Box b, Box from) {
 		// Aller f�rst - basistilfellet, slik at vi kan returnere
@@ -145,7 +133,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Oppdatere x og y i labyrinten f�r backtracking kalles
+	 * Call x and y for updating backtrack. Provided at project start
 	 * @param from Box
 	 * @param to Box
 	 */
@@ -157,7 +145,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Oppdatere x og y i labyrinten etter at backtracking er kalt
+	 * Call x and y for updating backtrack. Provided at project start
 	 * @param from Box
 	 * @param to Box
 	 */
@@ -169,8 +157,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Returnerer hele veien, fra tilfeldig startpunkt og ut av Maze som en array
-	 * @return [] PositionInMaze 
+	 * Return the entire solution path as array. Provided at project start
 	 */
 	private PositionInMaze [] solve() {
 		solveMaze();
@@ -181,8 +168,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Returnerer posisjonene som gir en vei rundt maze, tilfeldig valgt - mot h�yre eller mot venstre
-	 * @return [] PositionInMaze;
+	 * Return positions giving a way around the maze, randomly chosen (left or right). Provided at project start
 	 */
 	private PositionInMaze [] roundAbout() {
 		PositionInMaze [] pos = new PositionInMaze[dim * 2];
@@ -207,8 +193,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * L�ser hele maze, fra startposisjonen
-	 * @return
+	 * Solve entire maze, from start position. Provided at project start
 	 */
 	@SuppressWarnings("unused")
 	private PositionInMaze [] solveFull() {
@@ -220,8 +205,8 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Genererer opp veien ut av labyrinten fra en tilfeldig posisjon, samt veien 
-	 * rundt og frem til inngangen av labyrinten 
+	 * Generate solution out of maze starting from a random position, around the maze, and back to maze entrance.
+	 * Provided at project start
 	 */
 	private void makeFirstIteration() {
 		PositionInMaze [] outOfMaze = solve();
@@ -230,8 +215,8 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Genererer opp veien ut av labyrinten fra inngangsposisjonen i labyrinten, samt veien 
-	 * rundt og frem til inngangen av labyrinten igjen
+	 * Generate solution out of maze from entrance position, around the maze, and back to maze entrance.
+	 * Provided at project start
 	 */
 	private void makeNextIteration() {
 		// Tvinger posisjonen til � v�re ved inngang av Maze
@@ -243,7 +228,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Generisk metode som sl�r sammen to arrayer av samme type
+	 * Concatenate two equal arrays. Provided at project start
 	 * @param <T>
 	 * @param first
 	 * @param second
@@ -261,7 +246,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * When client receives an updated information object with info from all clients from server, store it
+	 * When client receives an updated information object from server, store it
 	 * @param objectHashMap
 	 * @throws RemoteException
 	 */
@@ -271,7 +256,7 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 	}
 
 	/**
-	 * Moves the client to next position in itinerary and informs server
+	 * Moves the client to next position in itinerary and informs server. If client has solved the maze, restart
 	 */
 	public void sendInfoToServer() throws RemoteException {
 
@@ -289,7 +274,6 @@ public class VirtualUser extends UnicastRemoteObject implements ClientCallbackIn
 		//if client has traversed the entire maze, reset travel path
 		if(totalPositionsMoved >= itinerary.length ) {
 			totalPositionsMoved = 0;
-//			init();
 		}
 	}
 

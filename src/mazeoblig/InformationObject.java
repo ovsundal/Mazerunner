@@ -17,7 +17,7 @@ public class InformationObject implements Serializable {
     private Integer clientId;
     private PositionInMaze position;
     private Color color;
-    private ClientCallbackInterface clientCallbackInterface;
+    private ClientCallbackInterface clientCallbackInterface = null;
 
     //info provided by server
     private int totalServerMessagesReceived;

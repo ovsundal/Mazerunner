@@ -1,7 +1,7 @@
 package mazeoblig;
 
 /**
- *Interface provided at assignment startup. No changes were made here
+ *Interface provided at assignment startup. No changes were made here. Used for creating the maze
  */
 
 import java.rmi.*;

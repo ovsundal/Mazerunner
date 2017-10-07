@@ -22,19 +22,25 @@ public class ServerMethods extends UnicastRemoteObject implements ServerInterfac
 
     protected ServerMethods() throws RemoteException {}
 
+    /**
+     * Assign each newly connected client a unique id
+     * @param cb
+     * @return
+     * @throws RemoteException
+     */
     @Override
     public Integer setClientId(ClientCallbackInterface cb) throws RemoteException {
         synchronized (clientList) {
             int id = clientId++;
             clientList.put(id, cb);
-            System.out.println("A new client was created: " + clientId);
             return id;
         }
     }
 
     /**
-     * All information server RECEIVES FROM client is provided by information object in this method.
-     * This method stores it in server
+     * All information server RECEIVES FROM client is encapsulated within the information object. Server recieves
+     * the object from each client in this method, updates the object with its own server-specific data,
+     * and adds the object to a hashmap
      * @param object
      * @throws RemoteException
      */
@@ -61,8 +67,8 @@ public class ServerMethods extends UnicastRemoteObject implements ServerInterfac
     }
 
     /**
-     * All information server SENDS TO client is provided by information object in this method.
-     * The server adds all information it has and sends it back to every registered client
+     * Send the hashmap containing collected information from all clients (and server specific data)
+     * back to all registered clients
      * @return
      * @throws RemoteException
      */
