@@ -8,8 +8,8 @@ import java.rmi.RemoteException;
 
 /**
  * All information client needs to pass to server (and server needs to pass to client) is stored within this object
- * It is updated with relevant client info, then sent to server. Server retrieves the data, add its own data and
- * sends back to each client a collection of updated informationObjects from all clients
+ * It is updated with relevant client info, then sent to server. Server retrieves the data, add its own data, and stores
+ * it in a hashmap. This hashmap with information objects from all clients is then sent back to each client
  */
 public class InformationObject implements Serializable {
 
