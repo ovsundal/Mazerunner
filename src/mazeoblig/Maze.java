@@ -43,8 +43,7 @@ public class Maze extends Applet {
     private int server_portnumber;
     private ServerInterface serverInterface;
     private HashMap<Integer, InformationObject> clientPositions = null;
-    private HashMap clientColors = null;
-    private final int CLIENTS_TO_CREATE = 75;
+    private final int CLIENTS_TO_CREATE = 2;
     private Integer mapDrawingClientId;
     long timeStart = System.currentTimeMillis();
 
@@ -115,7 +114,7 @@ public class Maze extends Applet {
 
         //clear the previous map
         bufferGraphics.clearRect(0, 0, dimension.width, dimension.height);
-
+        bufferGraphics.setColor(Color.BLACK);
         // Draw the map
         for (x = 1; x < (dim - 1); ++x)
             for (y = 1; y < (dim - 1); ++y) {
@@ -134,28 +133,53 @@ public class Maze extends Applet {
 
             int totalReceivedMessagesByServer = clientPositions.get(mapDrawingClientId).getTotalServerMessagesReceived();
             int totalSentMessagesByServer = clientPositions.get(mapDrawingClientId).getTotalClientMessagesSent();
+            long timeDeltaInSeconds;
 
-            //calculate messages/second
-            long timeDeltaInSeconds =  (System.currentTimeMillis() - timeStart) / 1000;
+            //calculate messages/second.
+
+                timeDeltaInSeconds =  (System.currentTimeMillis() - timeStart) / 1000;
+
+
+
 
             //add server statistics
+
             bufferGraphics.drawString("Total messages server has received: " + totalReceivedMessagesByServer, 0, 330);
 
             bufferGraphics.drawString("Total messages sent from server: " + totalSentMessagesByServer, 0, 345);
 
             bufferGraphics.drawString("---------------------", 0, 360);
 
-            bufferGraphics.drawString("AVG RECEIVED / SECOND: " +totalReceivedMessagesByServer / timeDeltaInSeconds,
-                    0, 375);
+            //protect against division by zero
+            try {
+                bufferGraphics.drawString("AVG RECEIVED / SECOND: " +totalReceivedMessagesByServer / timeDeltaInSeconds,
+                        0, 375);
+            } catch (ArithmeticException e) {
+                bufferGraphics.drawString("AVG RECEIVED / SECOND: 0",0, 375);
+            }
 
-            bufferGraphics.drawString("AVG RECEIVED PER CLIENT / SECOND: " +
-                            (totalReceivedMessagesByServer / timeDeltaInSeconds) / CLIENTS_TO_CREATE,0, 390);
+            try {
+                bufferGraphics.drawString("AVG SENT / SECOND: " + totalSentMessagesByServer / timeDeltaInSeconds,
+                        0, 390);
+            } catch (ArithmeticException e) {
+                bufferGraphics.drawString("AVG SENT / SECOND: 0" ,0, 390);
+            }
 
-            bufferGraphics.drawString("AVG SENT / SECOND: " + totalSentMessagesByServer / timeDeltaInSeconds,
-                    0, 415);
+            bufferGraphics.drawString("---------------------", 0, 405);
 
-            bufferGraphics.drawString("AVG SENT PER CLIENT / SECOND: " +
-                            (totalSentMessagesByServer / timeDeltaInSeconds) / CLIENTS_TO_CREATE,0, 430);
+            try {
+                bufferGraphics.drawString("AVG RECEIVED PER CLIENT / SECOND: " +
+                        (totalReceivedMessagesByServer / timeDeltaInSeconds) / CLIENTS_TO_CREATE,0, 420);
+            } catch (ArithmeticException e) {
+                bufferGraphics.drawString("AVG RECEIVED PER CLIENT / SECOND: 0",0, 420);
+            }
+
+            try {
+                bufferGraphics.drawString("AVG SENT PER CLIENT / SECOND: " +
+                        (totalSentMessagesByServer / timeDeltaInSeconds) / CLIENTS_TO_CREATE,0, 435);
+            } catch (ArithmeticException e) {
+                bufferGraphics.drawString("AVG SENT PER CLIENT / SECOND: 0",0, 435);
+            }
 
             //draw client positions
             clientPositions.forEach((key, value) -> {
