@@ -10,6 +10,10 @@ Project is part of a university course in distributed systems, fall 2017. Method
 2. Run /src/mazeoblig/Maze. This will create 50 clients, assign them a random position, and start traversing through the maze
 3. To add more clients, simply launch another Maze. Alternatively, modfiy the CLIENTS_TO_CREATE property (50 at default) 
 
+## Ways to improve the system
+
+* Implement server multicast
+
 ## Known problems
 
 * To reduce workload, only one (randomly assigned) client draws the maze. If this client for some reason disconnects, maze rendering will stop   
