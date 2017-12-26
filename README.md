@@ -2,7 +2,7 @@
 
 The purpose of this project is to have n different clients traversing through a unique maze, solving it in the end. When it is solved the client moves to starting possition and restarts the maze. The clients always know each others position, and updates an applet continuously. This is done having clients connecting to a server and passing data. The server then collects all this data and periodically sends the data back to each registered client. Project is done using java-rmi technology.
 
-Project is part of a university course in distributed systems, fall 2017. Methods for creating, rendering and solving the maze was provided at start. Methods for dealing with communication to and from server were the purpose of this proejct, and made by author 
+Project is part of a university course in distributed systems, fall 2017. Methods for creating, rendering and solving the maze was provided at start. Methods for dealing with communication to and from server were the purpose of this project, and was written by author 
 
 ## Installation
 
